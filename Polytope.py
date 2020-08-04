@@ -271,7 +271,7 @@ class Tile:
         if highlight is not None:
             regularPolygon(
                 [0, 0],
-                self._radius,
+                self._radius * 0.5,
                 self.getSides(),
                 self._draw_angle,
                 highlight
@@ -298,7 +298,10 @@ class Tile:
         return self._radius
     
     def highlight(self):
-        self.drawTile(0, color(255, 255, 0, 100))
-        
+        if self.getAttributes().isPassable():
+            self.drawTile(0, color(255, 255, 0, 100))
+        else:
+            self.drawTile(0, color(255, 0, 0, 100))
+            
     def isAdjacent(self, adj):
         return adj in self._adjacents
