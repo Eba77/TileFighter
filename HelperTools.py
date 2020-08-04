@@ -29,7 +29,7 @@ def square_dist(pos_1, pos_2):
     # TODO: I think processing has `dist` as a builtin?
     return sum([(x-y)**2 for x, y in zip(pos_1, pos_2)])
 
-# Taken from processing tutorial, modified slightly
+# Taken from processing tutorial, modified greatly
 # https://processing.org/examples/regularpolygon.html
 # why re-invent the wheel?
 cached_polies = dict({})
@@ -42,6 +42,9 @@ def regularPolygon(pos, radius, npoints, draw_angle, in_fill = None, in_stroke =
         # This algorithm would point apothem where we want
         # radius to point, so we swap them by rotating the
         # distance between radius and apothem
+        # Needed for triangles, I'm just guessing this generalizes
+        # to odd-sided shapes; doesn't really matter, 'cuz no
+        # k-uniform tiling will ever use odd non-triangle shapes
         draw_angle += PI / npoints
     pushMatrix()
     translate(pos[0], pos[1])
