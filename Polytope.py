@@ -200,6 +200,7 @@ class Tile:
         self._adjacents = set({})
         self._vertices = verts
         self._draw_angle = d_ang
+        self._attributes = self._biome.getTileAttributes(self.getSides())
         Tile.all_tiles.add(self)
         
     def getAdjacents(self):
@@ -261,7 +262,8 @@ class Tile:
             self._radius,
             self.getSides(),
             self._draw_angle,
-            self._color
+            self._attributes.getColor(),
+            self._attributes.getStroke()
         )
         if highlight is not None:
             regularPolygon(

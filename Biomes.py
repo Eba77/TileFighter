@@ -8,6 +8,7 @@ This file contains everything to do with the macro-scale terrain generation
 """
 
 from Geometry import *
+from TileAttributes import *
 
 class Biome:
     cur_id = 0
@@ -77,10 +78,23 @@ class Biome:
     def getAngleOffset(self, v, e):
         return sum([self.getTurningAngle(v, _e) for _e in range(e + 1)])
     
+    def getTileAttributes(self, sides):
+        """
+        Returns a TileAttribute instance
+        """
+        raise NotImplementedError
+    
 class HEX_FOREST(Biome):
     
     def __init__(self):
         Biome.__init__(self, VertexConfiguration([[6] * 3]), "Hex Forest", [color(0, 150, 0, 255), color(40, 120, 0, 255), color(0, 190, 0, 255)])
+        
+    def getTileAttributes(self, sides):
+        """
+        Returns a TileAttribute instance
+        Either HexForestGrass or HexForestTree
+        """
+        return HexForestGrass()
 
 class PLEASANT_PLAINS(Biome):
     
