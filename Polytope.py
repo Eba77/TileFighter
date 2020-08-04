@@ -1,3 +1,11 @@
+"""
+`Polytope.py`
+
+Handles generation of Vertices and Tiles (faces) at a more micro
+level than the `Biomes.py` file, which is more concerned with
+big-picture stuff.
+"""
+
 from Biomes import *
 from Geometry import *
 from HelperTools import *

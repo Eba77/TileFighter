@@ -1,3 +1,8 @@
+"""
+`Geometry.py`
+This handles the details of vertex configurations and their transformations
+"""
+
 class SigmaSwaps:
     def __init__(self, swap_dict):
         """
@@ -31,8 +36,8 @@ class VertexConfiguration:
     6^3 is another way to express 6.6.6
     6^3.4 would be 3 hexagons and then a square
     6.4.4.6 is not the same as 6.4.6.4 == (6.4)^2
-    We'll replace '.' with '@' to make Vertex Configuration compositions
-    So (6@4)^2 will be a programmatical way to represent this.
+    [3^6; (3.4)^2.3] is a 2-uniform tiling, each vertex belongs
+    to one of two configs listed above
     """
     
     def __init__(self, raw_config):

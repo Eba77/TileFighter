@@ -1,3 +1,10 @@
+"""
+`HelperTools.py`
+
+Implements all of the methods that I feel should be builtins, but aren't
+And also all numpy methods I would want but cannot use due to Java base
+"""
+
 import itertools
 
 # Note that Python Processing is built on Jython
@@ -19,6 +26,7 @@ def frange(start, stop, step):
             break
         
 def square_dist(pos_1, pos_2):
+    # TODO: I think processing has `dist` as a builtin?
     return sum([(x-y)**2 for x, y in zip(pos_1, pos_2)])
 
 # Taken from processing tutorial, modified slightly
