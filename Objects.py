@@ -86,9 +86,15 @@ class StabAttack(TileBound, Animation):
             self._target[0] - self._center[0],
             self._target[1] - self._center[1]
         ]
-        self._length = square_dist(self._target, self._center)
+        self._max_length = sqrt(square_dist(self._target, self._center))
+        self._length = 0
         self._angle_to_face = atan2(difference[1], difference[0])
-        self._move_steps = (self._length * i * 1.0 / self._move_time for i in range(1, self._move_time + 1))
+        self._move_steps = (
+            self._max_length * (i) * 2.0 / self._move_time
+            if i <= self._move_time / 2
+            else self._max_length * (self._move_time - i) * 2.0 / self._move_time
+            for i in range(1, self._move_time + 1)
+        )
         
     def continuousUpdate(self):
         """
@@ -112,7 +118,7 @@ class StabAttack(TileBound, Animation):
         # First we draw the overall arc of the stab
         stroke(0, 200, 255, 200)
         fill(0, 200, 255, 100)
-        arc(0, 0, 2 * self._length, 2 * self._length, -PI / 2, PI / 2)
+        arc(0, 0, 2 * self._length, 30, -PI / 2, PI / 2)
         
         # And now the actual sword
         stroke(0, 255, 255, 255)
