@@ -1,4 +1,5 @@
 from Polytope import *
+from HelperTools import *
 
 """
 `Objects.py`
@@ -73,6 +74,52 @@ class Animation():
     Class which gets destroyed when it is no longer moving
     """
     pass
+    
+class StabAttack(TileBound, Animation):
+    def __init__(self, pos, target_pos, weilder):
+        TileBound.__init__(self, pos)
+        self._weilder = weilder
+        self._is_moving = True
+        self._center = pos
+        self._target = target_pos
+        difference = [
+            self._target[0] - self._center[0],
+            self._target[1] - self._center[1]
+        ]
+        self._length = square_dist(self._target, self._center)
+        self._angle_to_face = atan2(difference[1], difference[0])
+        self._move_steps = (self._length * i * 1.0 / self._move_time for i in range(1, self._move_time + 1))
+        
+    def continuousUpdate(self):
+        """
+        Used for animation stuff, TileBounds should not
+        have logic based on this
+        """
+        if not self._is_moving:
+            return
+        try:
+            self._length = next(self._move_steps)
+        except StopIteration:
+            self._is_moving = False
+            self._weilder._is_moving = False
+            self._weilder._attack = None
+            
+    def drawObject(self):
+        pushMatrix()
+        translate(*(self._center))
+        rotate(self._angle_to_face)
+        
+        # First we draw the overall arc of the stab
+        stroke(0, 200, 255, 200)
+        fill(0, 200, 255, 100)
+        arc(0, 0, 2 * self._length, 2 * self._length, -PI / 2, PI / 2)
+        
+        # And now the actual sword
+        stroke(0, 255, 255, 255)
+        line(0, 0, self._length, 0)
+        
+        popMatrix()
+    
         
 class SwipeAttack(TileBound, Animation):
     def __init__(self, pos, weilder, radius):
@@ -97,10 +144,9 @@ class SwipeAttack(TileBound, Animation):
             self._old_rot = self._rot
             self._edge, self._rot = next(self._move_steps)
         except StopIteration:
-            self._position = self._move_destination
             self._is_moving = False
             self._weilder._is_moving = False
-            self._weilder._swipe_attack = None
+            self._weilder._attack = None
             
     def drawObject(self):
         pushMatrix()
