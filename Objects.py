@@ -39,6 +39,9 @@ class TileBound:
         if self._is_moving:
             # Can't move if already moving!
             return
+        if not destination.getAttributes().isPassable():
+            # Can't move if not onto a passable tile!
+            return
         self._is_moving = True
         self._move_destination = destination.getPosition()
         initial_position = self.getPosition()

@@ -244,6 +244,9 @@ class Tile:
     
     def getSides(self):
         return self._biome.getSides(*(self._position_in_vertex))
+    
+    def getAttributes(self):
+        return self._attributes
   
     def drawTile(self, depth, highlight = None):
         """
