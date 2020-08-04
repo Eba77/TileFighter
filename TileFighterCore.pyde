@@ -23,7 +23,7 @@ def setup():
     global current_tile, player
     fullScreen()
     frameRate(60)
-    first_vertex = Vertex(TEST_3_3_3_3_6, [0, 0], 0, (0, 0), 1)
+    first_vertex = Vertex(TEST_3_3_3_3_3_3_and_3_4_3_4_3(), [0, 0], 0, (0, 0), 1)
     first_vertex.generateTiles(depth=5)
     current_tile = first_vertex[0]
     player = Player(current_tile._position)
@@ -69,7 +69,7 @@ def draw():
     # Draw UI stuffs, these are done in screen coordinates!
     stroke(0)
     fill(0)
-    text("TileFighter Version 0.1a [Alpha]", 50, 50, 64)
+    text("TileFighter Version " + VERSION, 50, 50, 64)
         
     # Garbage collection; delete finished animations
     TileBound.all_objects = {obj for obj in TileBound.all_objects if not (isinstance(obj, Animation) and not obj._is_moving)}
