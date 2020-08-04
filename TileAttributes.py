@@ -65,6 +65,6 @@ class HexForestTree(Impassable):
     """
     
     def __init__(self):
-        Passable.__init__(self)
+        Impassable.__init__(self)
         self._color = color(30) # TODO: Better display choice
         self._stroke = color(0)

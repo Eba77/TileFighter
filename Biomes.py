@@ -9,6 +9,7 @@ This file contains everything to do with the macro-scale terrain generation
 
 from Geometry import *
 from TileAttributes import *
+import random as rnd
 
 class Biome:
     cur_id = 0
@@ -94,7 +95,11 @@ class HEX_FOREST(Biome):
         Returns a TileAttribute instance
         Either HexForestGrass or HexForestTree
         """
-        return HexForestGrass()
+        rnd_gen = rnd.random()
+        if rnd_gen < 0.9:
+            return HexForestGrass()
+        else:
+            return HexForestTree()
 
 class PLEASANT_PLAINS(Biome):
     
