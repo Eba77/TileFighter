@@ -76,17 +76,19 @@ class Animation():
     pass
     
 class StabAttack(TileBound, Animation):
-    def __init__(self, pos, target_pos, weilder):
+    def __init__(self, pos, target, weilder, damage):
         TileBound.__init__(self, pos)
         self._weilder = weilder
         self._is_moving = True
         self._center = pos
-        self._target = target_pos
+        self._target_loc = target.getPosition()
+        self._target = target
+        self._damage = damage
         difference = [
-            self._target[0] - self._center[0],
-            self._target[1] - self._center[1]
+            self._target_loc[0] - self._center[0],
+            self._target_loc[1] - self._center[1]
         ]
-        self._max_length = sqrt(square_dist(self._target, self._center))
+        self._max_length = sqrt(square_dist(self._target_loc, self._center))
         self._length = 0
         self._angle_to_face = atan2(difference[1], difference[0])
         self._move_steps = (
@@ -109,6 +111,7 @@ class StabAttack(TileBound, Animation):
             self._is_moving = False
             self._weilder._is_moving = False
             self._weilder._attack = None
+            self._target.damage(self._damage)
             
     def drawObject(self):
         pushMatrix()

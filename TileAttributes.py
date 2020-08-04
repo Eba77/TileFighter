@@ -29,6 +29,9 @@ class TileAttribute:
     
     def isStabDestructible(self):
         return False
+    
+    def destroy(self):
+        raise NotImplementedError
         
 class Passable(TileAttribute):
     """
@@ -66,7 +69,7 @@ class Destructible(Impassable):
         return True
     
     def destroy(self):
-        return to_what
+        return self._to_what
     
 class StabDestructible(Destructible):
     """
@@ -98,6 +101,6 @@ class HexForestTree(StabDestructible):
     """
     
     def __init__(self):
-        StabDestructible.__init__(self, HexForestGrass)
+        StabDestructible.__init__(self, HexForestGrass())
         self._color = color(30) # TODO: Better display choice
         self._stroke = color(0)

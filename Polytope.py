@@ -203,6 +203,10 @@ class Tile:
         self._attributes = self._biome.getTileAttributes(self.getSides())
         Tile.all_tiles.add(self)
         
+    def damage(self, how_much):
+        if self._attributes.isDestructible():
+            self._attributes = self._attributes.destroy()
+        
     def getAdjacents(self):
         return self._adjacents
     

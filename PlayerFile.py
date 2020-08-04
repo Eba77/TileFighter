@@ -7,6 +7,7 @@ from Objects import *
 
 class Player(TileBound):
     MAX_SWIPE_DIST = 250
+    DAMAGE = 5
     
     def __init__(self, pos):
         TileBound.__init__(self, pos)
@@ -18,12 +19,12 @@ class Player(TileBound):
             return
         if destination.getAttributes().isStabDestructible():
             # We can destroy it!
-            self.stab(destination.getPosition())
+            self.stab(destination)
         else:
             # We'll try to move
             TileBound.move(self, destination)
         
-    def stab(self, where):
+    def stab(self, what):
         """
         Triggers the player's stab attack
         """
@@ -34,7 +35,7 @@ class Player(TileBound):
         # the same position, so that no real moving happens.
         self._is_moving = True
         self._move_steps = (self._position for x in itertools.count())
-        self._attack = StabAttack(self._position, where, self)
+        self._attack = StabAttack(self._position, what, self, Player.DAMAGE)
         
     def swipe(self):
         """
