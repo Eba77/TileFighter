@@ -56,3 +56,9 @@ def regularPolygon(pos, radius, npoints, draw_angle, in_fill = None, in_stroke =
     cached_polies[npoints].setStrokeWeight(1.0/radius)
     shape(cached_polies[npoints])
     popMatrix()
+    
+"""
+^^^ Really cool effect with `regularPolygon`
+Play in TEST_3_3_3_3_3_3_and_3_4_3_4_3, but don't have the npoints%2==1 bit and rotate by
+the negative draw angle.  Gives an interesting look!
+"""

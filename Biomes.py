@@ -1,4 +1,11 @@
 # -*- coding: utf-8 -*-
+"""
+`Biomes.py`
+This file contains everything to do with the macro-scale terrain generation
+(the only aspect of terrain generation not under its control is the fine
+ details of how tilings are done, which are either in `Geometry.py` or
+ `Polytope.py`)
+"""
 
 from Geometry import *
 
