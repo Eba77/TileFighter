@@ -1,3 +1,14 @@
+"""
+`TileFighterCore.py`
+This is the entry point to the application, and will likely be a bit of a mess!
+Prototyping is often done in this file before things get factored out to their
+own areas.
+
+In theory this should just house the `setup`, `draw`, and event functions like
+`keyPressed`, as well as any helper functions made specifically for those
+methods.  In practice, this file could contain anything!
+"""
+
 import itertools
 import math
 from Biomes import *
@@ -6,8 +17,6 @@ from HelperTools import *
 DRAW_VERTICES = True
 CLOSENESS_CONSTANT = 1 # how close two tiles have to be to be considered the same
 
-
-    
 """
 ^^^ Really cool effect with `regularPolygon`
 Play in TEST_3_3_3_3_3_3_and_3_4_3_4_3, but don't have the npoints%2==1 bit and rotate by
