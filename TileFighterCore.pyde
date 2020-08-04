@@ -15,6 +15,7 @@ from Biomes import *
 from HelperTools import *
 from Polytope import *
 from Objects import *
+from PlayerFile import *
 
 current_tile = None
 player = None

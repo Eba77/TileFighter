@@ -24,6 +24,12 @@ class TileAttribute:
     def isPassable(self):
         raise NotImplementedError
         
+    def isDestructible(self):
+        return False
+    
+    def isStabDestructible(self):
+        return False
+        
 class Passable(TileAttribute):
     """
     A tile that standard TileBounds can pass through
@@ -45,6 +51,33 @@ class Impassable(TileAttribute):
         
     def isPassable(self):
         return False
+    
+class Destructible(Impassable):
+    """
+    Anything that can be destroyed by some method
+    `to_what` is the tile left behind after destruction
+    """
+    
+    def __init__(self, to_what):
+        TileAttribute.__init__(self)
+        self._to_what = to_what
+        
+    def isDestructible(self):
+        return True
+    
+    def destroy(self):
+        return to_what
+    
+class StabDestructible(Destructible):
+    """
+    Anything that can be destroyed by the player's stab attack
+    """
+    
+    def __init__(self, to_what):
+        Destructible.__init__(self, to_what)
+        
+    def isStabDestructible(self):
+        return True
         
 class HexForestGrass(Passable):
     """
@@ -57,7 +90,7 @@ class HexForestGrass(Passable):
         self._color = rnd.choice([color(0, 150, 0, 255), color(40, 120, 0, 255), color(0, 190, 0, 255)])
         self._stroke = color(0)
         
-class HexForestTree(Impassable):
+class HexForestTree(StabDestructible):
     """
     Simple tree
     Can't be passed through, can be cut down
@@ -65,6 +98,6 @@ class HexForestTree(Impassable):
     """
     
     def __init__(self):
-        Impassable.__init__(self)
+        StabDestructible.__init__(self, HexForestGrass)
         self._color = color(30) # TODO: Better display choice
         self._stroke = color(0)
