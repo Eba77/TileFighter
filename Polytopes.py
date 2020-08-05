@@ -94,6 +94,32 @@ class Edge(Polytope):
         options = [face for face in v1._friends if face in v2._friends]
         assert len(options) == 2, "Somethin' funky goin' on with them there faces..."
         self._faces = (options[0], options[1])
+        options[0]._edges.add(self)
+        options[1]._edges.add(self)
+        
+    @classmethod
+    def inCommon(cls, d1, d2):
+        """
+        Gets the common edge between two duals
+        Note that this only checks for an edge that appears
+        in both their `_edges` list, it doesn't check if
+        they are the same type of dual.  This will blindly
+        return the first valid edge it finds - if they are
+        the same type of dual, this will also be the only
+        valid edge; if they are different, there will be two.
+        Use the `inCommons` function if you want a list of
+        all valid edges.
+        """
+        to_return = cls.inCommons(d1, d2)
+        return None if len(to_return) == 0 else to_return[0]
+        
+    @classmethod
+    def inCommons(cls, d1, d2):
+        """
+        See `common`; gets all valid edges between duals
+        """
+        assert d1._edges is not None and d2._edges is not None, "Need edges to exist!"
+        return [edge for edge in d1._edges if edge in d2._edges]
         
     
 class Duals(Polytope):
@@ -186,17 +212,26 @@ class Duals(Polytope):
     """
     These three are calculated directly from the geometry
     """
-    def getTurningAngle(self):
-        return 100
-        raise NotImplementedError
+    def getTurningAngle(self, edge):
+        """
+        Draw two lines from center of dual to two of its friends (who are adjacent to eachother)
+        The angle made by these lines is the turning angle
+        The `edge` specifies which pair of friends to get
+        """
+        friend1, friend2 = edge._vertices if isinstance(self, Face) else edge._faces
+        return abs(atan2(
+            friend1[1] - friend2[1],
+            friend1[0] - friend2[0]
+        ))
         #return self._biome.getTurningAngle(*self._position_in_vertex)
     
-    def getApothem(self):
+    def getApothem(self, edge):
         """
         Similar to radius, heads to center of edge rather than center of dual
+        This is easier to calculate so we acutally derive the radius from it!
         """
-        return 100
-        raise NotImplementedError
+        edge_center = edge.getPosition()
+        return sqrt(square_dist(edge_center, self.getPosition()))
         #return self.getRadius() * cos(self.getTurningAngle() / 2)
     
     def getRadius(self):
@@ -366,6 +401,7 @@ class Face(Duals):
         Duals.__init__(self, Face, biome, position, heading_, state)
         self._friends = set({})
         self._adjacents = set({})
+        self._edges = set({})
         self._goal_friends = self.getSides()
         
         Polytope.all_polytopes[Face].add(self)
@@ -403,9 +439,14 @@ class Face(Duals):
             for friend in self._friends:
                 #if friend.notCompletelyGenerated(): # < - for some reason, doesn't work with this condition.  TODO: why?
                 friend.generate(depth=2)
-                
-        # Now generate all its edges
-        # Note that ungenerated edges lie with vertices, not faces
+        
+        self.generateEdges()
+          
+    def generateEdges(self):
+        """  
+        Generates all its edges
+        Note that ungenerated edges lie with vertices, not faces
+        """
         for friend in self._friends:
             for edge in friend._edges:
                 if edge.notCompletelyGenerated():

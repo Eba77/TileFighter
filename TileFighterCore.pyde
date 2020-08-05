@@ -25,8 +25,9 @@ def setup():
     fullScreen()
     frameRate(60)
     first_vertex = Vertex(TEST_3_3_3_3_3_3_and_3_4_3_4_3(), [0, 0], 0, (0, 0), 1)
-    first_vertex.generate(depth=5)
+    first_vertex.generate(depth=1)
     current_tile = first_vertex.getFriends()[0]
+    current_tile.generateEdges()
     player = Player(current_tile._position)
     print "Vertices on initial gen: ", len(Polytope.all_polytopes[Vertex])
     print "Tiles on initial gen: ", len(Polytope.all_polytopes[Face])

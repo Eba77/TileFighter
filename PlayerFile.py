@@ -79,6 +79,11 @@ class Player(TileBound):
                 ]
                 def direc_r(r):
                     return [direction[0] * r, direction[1] * r]
-                line(*(direc_r(tile.getApothem()*0.8) + direc_r(tile.getApothem() + t.getApothem() * 0.2)))
+                common_edge = Edge.inCommon(tile, t)
+                assert common_edge is not None, "Adjacent faces have no common edge...  that's a l'il weid.."
+                line(*(
+                    direc_r(tile.getApothem(common_edge) * 0.8)
+                    + direc_r(tile.getApothem(common_edge) + t.getApothem(common_edge) * 0.2)
+                ))
         
         popMatrix()
