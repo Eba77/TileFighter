@@ -53,6 +53,9 @@ class Vertex:
         
         Vertex.all_vertices.add(self)
         
+    def getPosition(self):
+        return self._position
+    
     def isPartiallyGenerated(self):
         """
         If this vertex doesn't have all friends generated
@@ -203,6 +206,23 @@ class Tile:
         self._attributes = self._biome.getTileAttributes(self.getSides())
         Tile.all_tiles.add(self)
         
+    def getMonotonicVertices(self):
+        """
+        Returns a list of vertices, sorted in terms of their angle away from center
+        This will only work for CONVEX polygons!
+        (Well, okay, it will work for nonconvex too, it just won't be useful; two
+        adjacent vertices in the list won't necessarily be connected if nonconvex)
+        """
+        to_return = list(self._vertices)
+        to_return.sort(
+            key=lambda vert: atan2(
+                vert.getPosition()[1] - self._position[1],
+                vert.getPosition()[0] - self._position[0]
+            )
+        )
+        return to_return
+        
+        
     def damage(self, how_much):
         if self._attributes.isDestructible():
             self._attributes = self._attributes.destroy()
@@ -272,6 +292,12 @@ class Tile:
             self._attributes.getColor(),
             self._attributes.getStroke()
         )
+        """irregularPolygon(
+            [0, 0],
+            [[x.getPosition()[0] - self._position[0], x.getPosition()[1] - self._position[1]] for x in self.getMonotonicVertices()],
+            self._attributes.getColor(),
+            self._attributes.getStroke()
+        )"""
         if highlight is not None:
             regularPolygon(
                 [0, 0],

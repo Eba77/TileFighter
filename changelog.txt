@@ -10,6 +10,6 @@
 0.1a Alpha
 
 - Initial Commit
-- Generation works for all regular and archimeddean tilings.
+- Generation works for all regular and archimedean tilings.
 - Generation works for [3^6; (3.4)^2.3]
 - Player can move and swipe
