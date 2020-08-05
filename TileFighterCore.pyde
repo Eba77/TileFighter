@@ -26,10 +26,10 @@ def setup():
     frameRate(60)
     first_vertex = Vertex(HEX_FOREST(), [0, 0], 0, (0, 0), 1)
     first_vertex.generate(depth=5)
-    current_tile = first_vertex[0]
+    current_tile = first_vertex.getFriends()[0]
     player = Player(current_tile._position)
-    print "Vertices on initial gen: ", len(Vertex.all_vertices)
-    print "Tiles on initial gen: ", len(Tile.all_tiles)
+    print "Vertices on initial gen: ", len(Polytope.all_polytopes[Vertex])
+    print "Tiles on initial gen: ", len(Polytope.all_polytopes[Face])
 
 def draw():
     # First, we do a continuous update on all things:
@@ -40,7 +40,7 @@ def draw():
     translate(width / 2 - player.getPosition()[0], height / 2 - player.getPosition()[1])
     background(150)
     partialGens = set({})
-    for tile in Tile.all_tiles:
+    for tile in Polytope.all_polytopes[Face]:
         # Only want to draw tiles that are on the screen
         # subtracting out the radius for leinency
         distance = [
@@ -57,7 +57,7 @@ def draw():
         tile.drawTile(depth=1)
         
     # Highlight tile that the cursor is on
-    tile_pointing_at = Tile.getTileOn(getMouse())
+    tile_pointing_at = Face.getPolytopeOn(getMouse())
     if tile_pointing_at is not None:
         tile_pointing_at.highlight()
         
@@ -84,7 +84,7 @@ def mousePressed():
     Move player
     TODO: If tile not empty, attack denizen with stab attack!
     """
-    player.move(Tile.getTileOn(getMouse()))
+    player.move(Face.getPolytopeOn(getMouse()))
     
         
 # Since x button bar d/n exist in Python mode, this is an easy way to quit!
@@ -94,8 +94,8 @@ def keyPressed():
     called `key` which stores the most recent key pressed!
     """
     if key == ESC:
-        print "Vertices explored: ", len(Vertex.all_vertices)
-        print "Tiles explored: ", len(Tile.all_tiles)
+        print "Vertices explored: ", len(Polytope.all_polytopes[Vertex])
+        print "Tiles explored: ", len(Polytope.all_polytopes[Face])
         exit()
     if key == 'z' or key == 'Z':
         player.swipe()

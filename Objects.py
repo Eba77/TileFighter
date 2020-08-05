@@ -28,7 +28,7 @@ class TileBound:
         TileBound.all_objects.add(self)
         
     def getTileOn(self):
-        return Tile.getTileOn(self._position)
+        return Face.getPolytopeOn(self._position)
         
     def drawObject(self):
         print "No draw method!"

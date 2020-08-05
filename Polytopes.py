@@ -89,7 +89,7 @@ class Duals(Polytope):
             return None
         close_topes = sorted(relevants, key=lambda t: square_dist(pos, t.getPosition()))
         for tope in close_topes:
-            if evenOddRule(tope.getPosition(), [dual_tope.getPosition() for dual_tope in tope.getMonotonicFriends()]):
+            if evenOddRule(tope.getPosition(), [dual_tope.getPosition() for dual_tope in tope.getMonotonic(tope._friends)]):
                 return tope
         return None
     
@@ -117,13 +117,9 @@ class Duals(Polytope):
         self._heading = math.fmod(heading_, TWO_PI)
         self._state = state
         self._adjacents = []
-        if cls == Vertex:
-            amount = self._biome.getTileNumAtVertex(self._state[0])
-        elif cls == Face:
-            amount = self._biome.getConfig()[self._state[0]][self._state[1]]
-        self._friends = [None for x in range(amount)]
-        self._adjacents = [None for x in range(amount)]
-        self._edges = [None for x in range(amount)]
+        self._friends = None # Implement these in child classes
+        self._adjacents = None
+        self._edges = None
     
     def getMonotonic(self, to_be_monotonized):
         """
@@ -183,6 +179,7 @@ class Duals(Polytope):
     These three are calculated directly from the geometry
     """
     def getTurningAngle(self):
+        return 100
         raise NotImplementedError
         #return self._biome.getTurningAngle(*self._position_in_vertex)
     
@@ -190,12 +187,20 @@ class Duals(Polytope):
         """
         Similar to radius, heads to center of edge rather than center of dual
         """
+        return 100
         raise NotImplementedError
         #return self.getRadius() * cos(self.getTurningAngle() / 2)
     
     def getRadius(self):
+        return 100
         raise NotImplementedError
         #return self._radius
+        
+    def getSides(self):
+        if isinstance(self, Vertex):
+            amount = self._biome.getTileNumAtVertex(self._state[0])
+        elif isinstance(self, Face):
+            amount = self._biome.getConfig()[self._state[0]][self._state[1]]
     
 @definePolytope
 class Vertex(Duals):
@@ -211,6 +216,8 @@ class Vertex(Duals):
         """
         Duals.__init__(self, Vertex, biome, position, heading_, state)
         self._spin = 1 if spin > 0 else -1
+        self._friends = [None for x in range(self.getSides())]
+        self._adjacents = [None for x in range(self.getSides())]
         
         Polytope.all_polytopes[Vertex].add(self)
         
@@ -243,15 +250,14 @@ class Vertex(Duals):
                         angle,
                         (self._state[0], idx),
                     )
-                tile._friends[0] = self # Not sure if this is a good indexing?
+                tile.addFriend(self)
                 self._friends[raw_idx] = tile
             else:
-                val.addVertex(self)
+                val.addFriend(self)
             if raw_idx > 0:
                 # Make tiles adjacent to eachother correctly
-                # note that addAdjacent works two-ways, but is a set
-                # so no worries about duplicates.
-                self._friends[raw_idx].addAdjacent(self._friends[raw_idx-1])
+                self._friends[raw_idx].addAdjacent(self._friends[raw_idx - 1])
+                self._friends[raw_idx - 1].addAdjacent(self._friends[raw_idx])
                 
                 # Add vertices at tile intersections
                 new_pos = [
@@ -275,6 +281,7 @@ class Vertex(Duals):
            
         # Match up beginning with end
         self._friends[0].addAdjacent(self._friends[-1])
+        self._friends[-1].addAdjacent(self._friends[0])
         new_pos = [
             cos(angle) * side_length + self._position[0],
             sin(angle) * side_length + self._position[1]
@@ -282,9 +289,9 @@ class Vertex(Duals):
         vert = Vertex.getNearestPolytopeWithin(new_pos, CLOSENESS_CONSTANT)
         if vert is None:
             new_heading = PI + angle
-            vert = Vertex(self._biome, new_pos, new_heading, self._biome.swap(self._vertex_type, self._index_offset), -self._spin)
+            vert = Vertex(self._biome, new_pos, new_heading, self._biome.swap(*self._state), -self._spin)
         self._adjacents[0] = vert
-        self._friends[0].addVertex(vert)
+        self._friends[0].addFriend(vert)
         
         # Recursive generation!
         if depth > 1:
@@ -301,7 +308,7 @@ class Vertex(Duals):
         fill(255)#self._heading / TWO_PI * 255)
         circle(0, 0, 20)
         fill(0, 0, 200)
-        text(str([self._vertex_type, self._index_offset]), -6, 6, 16)
+        text(str(self._state), -6, 6, 16)
         
         # Draw line pointing in direction of `heading`
         stroke(0, 255, 0)
@@ -321,10 +328,27 @@ class Face(Duals):
         `state` is the SigmaSwaps-relevant pair
         """
         Duals.__init__(self, Face, biome, position, heading_, state)
+        self._friends = set({})
+        self._adjacents = set({})
+        
         Polytope.all_polytopes[Face].add(self)
         
     def getSides(self):
         return self._biome.getSides(*(self._state))
+    
+    def addAdjacent(self, adj):
+        """
+        Note that this is NOT mutual
+        """
+        if adj is not None:
+            self._adjacents.add(adj)
+            
+    def addFriend(self, friend):
+        """
+        Note that this is NOT mutual
+        """
+        if friend is not None:
+            self._friends.add(friend)
     
     def highlight(self):
         if self.getAttributes().isPassable():
@@ -351,7 +375,7 @@ class Face(Duals):
                     x.getPosition()[0] - self._position[0],
                     x.getPosition()[1] - self._position[1]
                 ]
-                for x in self.getMonotonicVertices()
+                for x in self.getMonotonic(self._friends)
             ],
             self._attributes.getColor(),
             self._attributes.getStroke()
@@ -364,7 +388,7 @@ class Face(Duals):
                         (x.getPosition()[0] - self._position[0]) * 0.5,
                         (x.getPosition()[1] - self._position[1]) * 0.5
                     ]
-                    for x in self.getMonotonicVertices()
+                    for x in self.getMonotonic(self._friends)
                 ],
                 self._attributes.getColor(),
                 self._attributes.getStroke()
