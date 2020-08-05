@@ -33,6 +33,18 @@ class TileAttribute:
     def destroy(self):
         raise NotImplementedError
         
+class MetaTile(TileAttribute):
+    """
+    Parent class to meta-ified biomes.
+    """
+    def __init__(self, biome):
+        TileAttribute.__init__(self)
+        self._biome = biome
+        
+    def __eq__(self, other):
+        return self._biome == other._biome
+    
+                    
 class Passable(TileAttribute):
     """
     A tile that standard TileBounds can pass through

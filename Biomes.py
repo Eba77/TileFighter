@@ -88,18 +88,47 @@ class Biome:
         else:
             raise NotImplementedError
             
+def generateable(x):
+    """
+    Adds biome to world gen
+    """
+    MetaBiome.options.add(MetaBiome.makeMeta(x))
+    return x
+            
 class MetaBiome(Biome):
     """
     This is the thing that handles placing the tiling of the biomes themselves
     (not the tiles internal to the biome)
     """
+    options = set({})
+    
+    @classmethod
+    def makeMeta(cls, biome):
+        """
+        Turns a biome class into a TileAttribute Class
+        """
+        class _(MetaTile):
+            def __init__(self):
+                MetaTile.__init__(self, biome)
+        return _
     
     def __init__(self, v_conf):
+        """
+        Unlike other biomes, the MetaBiome can have its tiling arbitrarily chosen!
+        """
         Biome.__init__(self, v_conf, "MetaBiome")
+        self._base_radius = [1000] * len(self._vertex_configuration)
         
     def getTileAttributes(self, sides, adjacents):
-        return None
+        """
+        This determines what biomes can be next to eachother
+        Only rule currently is that biomes can't be next to themselves
+        """
+        options = {x for x in MetaBiome.options if x not in adjacents}
+        assert len(options) > 0, "All outta options..."
+        return rnd.choice(options)
     
+@generateable
 class HEX_FOREST(Biome):
     
     def __init__(self):
@@ -116,6 +145,7 @@ class HEX_FOREST(Biome):
         else:
             return HexForestTree()
 
+@generateable
 class PLEASANT_PLAINS(Biome):
     
     def __init__(self):
@@ -127,6 +157,7 @@ class PLEASANT_PLAINS(Biome):
         """
         return FancyFloor()
 
+@generateable
 class DANGEROUS_DESERT(Biome):
     
     def __init__(self):
@@ -138,47 +169,56 @@ class DANGEROUS_DESERT(Biome):
         """
         return FancyFoliage()
 
+@generateable
 class TEST_8_8_4(Biome):
     
     def __init__(self):
         Biome.__init__(self, VertexConfiguration([[8, 8, 4]]), "???")
 
+@generateable
 class TEST_4_6_12(Biome):
     
     def __init__(self):
         Biome.__init__(self, VertexConfiguration([[4, 6, 12]]), "???")
 
+@generateable
 class TEST_4_3_4_3_3(Biome):
     
     def __init__(self):
         Biome.__init__(self, VertexConfiguration([[4, 3, 4, 3, 3]]), "???")
 
+@generateable
 class TEST_3_3_3_4_4(Biome):
     
     def __init__(self):
         Biome.__init__(self, VertexConfiguration([[3, 3, 3, 4, 4]]), "???")
 
+@generateable
 class TEST_3_3_3_3_6(Biome):
     
     def __init__(self):
         Biome.__init__(self, VertexConfiguration([[3, 3, 3, 3, 6]] * 2), "???")
         # ^^^ Chiral, so I used the vertex mirroring trick, hence why it looks 2-uniform; it is really 1-uniform
 
+@generateable
 class TEST_3_6_3_6(Biome):
     
     def __init__(self):
         Biome.__init__(self, VertexConfiguration([[3, 6, 3, 6]]), "???")
 
+@generateable
 class TEST_3_4_6_4(Biome):
     
     def __init__(self):
         Biome.__init__(self, VertexConfiguration([[3, 4, 6, 4]]), "???")
 
+@generateable
 class TEST_3_12_12(Biome):
     
     def __init__(self):
         Biome.__init__(self, VertexConfiguration([[3, 12, 12]]), "???")
 
+@generateable
 class TEST_3_3_3_3_3_3_and_3_4_3_4_3(Biome):
     
     def __init__(self):
