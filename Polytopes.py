@@ -80,7 +80,7 @@ class Edge(Polytope):
         self._vertices = (v1, v2)
         self._faces = None
         
-    def isPartiallyGenerated(self):
+    def notCompletelyGenerated(self):
         return self._faces is None
     
     def fullyGenerate(self):
@@ -171,7 +171,7 @@ class Duals(Polytope):
     def getFriends(self):
         return self._friends
     
-    def isPartiallyGenerated(self):
+    def notCompletelyGenerated(self):
         """
         Return true if not all friends have been generated
         """
@@ -257,7 +257,7 @@ class Vertex(Duals):
            
         if isinstance(self._attributes, UnloadedTile):
             # See if this completes the set!  Generate now.
-            if not self.isPartiallyGenerated():
+            if not self.notCompletelyGenerated():
                 self._attributes = self._biome.getTileAttributes(self.getSides(), self._adjacents)
         
     def generate(self, depth):
@@ -389,7 +389,7 @@ class Face(Duals):
            
         if isinstance(self._attributes, UnloadedTile):
             # See if this completes the set!  Generate now.
-            if not self.isPartiallyGenerated():
+            if not self.notCompletelyGenerated():
                 self._attributes = self._biome.getTileAttributes(self.getSides(), self._adjacents)
             
     def fullyGenerate(self):
@@ -397,18 +397,18 @@ class Face(Duals):
         Generate all friend vertices!
         """
         loop_count = 0
-        while self.isPartiallyGenerated():
+        while self.notCompletelyGenerated():
             assert loop_count < 100, "Something went wrong - stuck in an infinite generation loop!"
             loop_count += 1
             for friend in self._friends:
-                #if friend.isPartiallyGenerated(): # < - for some reason, doesn't work with this condition.  TODO: why?
+                #if friend.notCompletelyGenerated(): # < - for some reason, doesn't work with this condition.  TODO: why?
                 friend.generate(depth=2)
                 
         # Now generate all its edges
         # Note that ungenerated edges lie with vertices, not faces
         for friend in self._friends:
             for edge in friend._edges:
-                if edge.isPartiallyGenerated():
+                if edge.notCompletelyGenerated():
                     edge.fullyGenerate()
     
     def highlight(self):

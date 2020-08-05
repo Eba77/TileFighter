@@ -49,7 +49,7 @@ def draw():
         ]
         if distance[0] < width / 2 and distance[1] < height / 2:
             tile.drawTile(depth=1)
-            if tile.isPartiallyGenerated():
+            if tile.notCompletelyGenerated():
                 partialGens.add(tile)
     for tile in partialGens:
         # Any tile that is onscreen needs to be fully generated!
