@@ -388,7 +388,7 @@ class Face(Duals):
                     ]
                     for x in self.getMonotonic(self._friends)
                 ],
-                self._attributes.getColor(),
+                highlight,
                 self._attributes.getStroke()
             )
         popMatrix()
