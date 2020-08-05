@@ -49,7 +49,7 @@ class Player(TileBound):
         self._is_moving = True
         self._move_steps = (self._position for x in itertools.count())
         t_on = self.getTileOn()
-        swipe_length = min(1.3 * (t_on.getApothem() + max((adj.getApothem() for adj in t_on._adjacents))), Player.MAX_SWIPE_DIST)
+        swipe_length = min(1.3 * (t_on.getAverageApothem() + max((adj.getAverageApothem() for adj in t_on._adjacents))), Player.MAX_SWIPE_DIST)
         self._attack = SwipeAttack(self._position, self, swipe_length)
         
     def drawObject(self):
