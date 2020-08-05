@@ -1,3 +1,8 @@
+0.2d Alpha
+
+- Finished moving to new generation system
+- All old things work again
+
 0.2c Alpha
 
 - Moved to new generation system that is more flexible

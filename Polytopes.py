@@ -245,7 +245,6 @@ class Duals(Polytope):
         """
         edge_center = edge.getPosition()
         return sqrt(square_dist(edge_center, self.getPosition()))
-        #return self.getRadius() * cos(self.getTurningAngle() / 2)
         
     def getAverageApothem(self):
         """

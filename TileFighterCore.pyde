@@ -94,7 +94,6 @@ def draw():
 def getMouse():
     return [mouseX - width / 2 + player.getPosition()[0], mouseY - height / 2 + player.getPosition()[1]]
     
-        
 def mousePressed():
     """
     Move player
@@ -102,8 +101,6 @@ def mousePressed():
     """
     player.move(Face.getPolytopeOn(getMouse()))
     
-        
-# Since x button bar d/n exist in Python mode, this is an easy way to quit!
 def keyPressed():
     """
     While this doesn't formally take a parameter, under-the-hood it uses a magic global variable
