@@ -80,6 +80,8 @@ class Edge(Polytope):
         self._vertices = (v1, v2)
         self._faces = None
         
+        Polytope.all_polytopes[Edge].add(self)
+        
     def notCompletelyGenerated(self):
         return self._faces is None
     
@@ -96,6 +98,16 @@ class Edge(Polytope):
         self._faces = (options[0], options[1])
         options[0]._edges.add(self)
         options[1]._edges.add(self)
+        
+    def drawEdge(self):
+        pushMatrix() # I don't actually use these matrices!
+        strokeWeight(5)
+        v1, v2 = self._vertices
+        a, b = v1.getPosition()
+        c, d = v2.getPosition()
+        line(a, b, c, d)
+        strokeWeight(1)
+        popMatrix()
         
     @classmethod
     def inCommon(cls, d1, d2):
@@ -427,6 +439,9 @@ class Face(Duals):
             # See if this completes the set!  Generate now.
             if not self.notCompletelyGenerated():
                 self._attributes = self._biome.getTileAttributes(self.getSides(), self._adjacents)
+                
+    def missingEdges(self):
+        return len(self._edges) < self._goal_friends
             
     def fullyGenerate(self):
         """
@@ -496,9 +511,6 @@ class Face(Duals):
                 self._attributes.getStroke()
             )
         popMatrix()
-        if DRAW_VERTICES:
-            for vert in self._friends:
-                vert.drawVertex()
         if depth > 1:
             for adj in self._adjacents:
                 if adj is not None:

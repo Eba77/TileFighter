@@ -32,6 +32,17 @@ def setup():
     print "Vertices on initial gen: ", len(Polytope.all_polytopes[Vertex])
     print "Tiles on initial gen: ", len(Polytope.all_polytopes[Face])
 
+def posOnScreen(pos, leniency):
+    """
+    Returns true if the point is on the screen
+    Leniency specifies how far away it can be
+    """
+    distance = [
+        abs(pos[0] - player.getPosition()[0]) - leniency,
+        abs(pos[1] - player.getPosition()[1]) - leniency
+    ]
+    return distance[0] < width / 2 and distance[1] < height / 2
+
 def draw():
     # First, we do a continuous update on all things:
     for obj in TileBound.all_objects:
@@ -42,15 +53,9 @@ def draw():
     background(150)
     partialGens = set({})
     for tile in Polytope.all_polytopes[Face]:
-        # Only want to draw tiles that are on the screen
-        # subtracting out the radius for leinency
-        distance = [
-            abs(tile.getPosition()[0] - player.getPosition()[0]) - tile.getRadius(),
-            abs(tile.getPosition()[1] - player.getPosition()[1]) - tile.getRadius()
-        ]
-        if distance[0] < width / 2 and distance[1] < height / 2:
+        if posOnScreen(tile.getPosition(), tile.getRadius()):
             tile.drawTile(depth=1)
-            if tile.notCompletelyGenerated():
+            if tile.notCompletelyGenerated() or tile.missingEdges():
                 partialGens.add(tile)
     for tile in partialGens:
         # Any tile that is onscreen needs to be fully generated!
@@ -61,6 +66,16 @@ def draw():
     tile_pointing_at = Face.getPolytopeOn(getMouse())
     if tile_pointing_at is not None:
         tile_pointing_at.highlight()
+        
+    if DRAW_EDGES:
+        for edge in Polytope.all_polytopes[Edge]:
+            if posOnScreen(edge.getPosition(), 40):
+                edge.drawEdge()
+        
+    if DRAW_VERTICES:
+        for vert in Polytope.all_polytopes[Vertex]:
+            if posOnScreen(vert.getPosition(), 40):
+                vert.drawVertex()
         
     # Draw all objects
     for obj in TileBound.all_objects:
