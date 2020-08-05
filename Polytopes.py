@@ -120,6 +120,7 @@ class Duals(Polytope):
         self._friends = None # Implement these in child classes
         self._adjacents = None
         self._edges = None
+        self._goal_friends = None # Amount of friends we need to reach
     
     def getMonotonic(self, to_be_monotonized):
         """
@@ -149,25 +150,8 @@ class Duals(Polytope):
     def isPartiallyGenerated(self):
         """
         Return true if not all friends have been generated
-        Figure this out later
         """
-        return False
-    
-    def fullyGenerate(self):
-        """
-        Generate all adjacent vertices!
-        """
-        if isinstance(self, Vertex):
-            # TODO: Make generation method work both ways?
-            # Or move this into Face.
-            raise NotImplementedError
-        loop_count = 0
-        while self.isPartiallyGenerated():
-            assert loop_count < 100, "Something went wrong - stuck in an infinite generation loop!"
-            loop_count += 1
-            for friend in self._friends:
-                if friend.isPartiallyGenerated():
-                    friend.generate(depth=2)
+        return len([x for x in self._friends if x is not None]) < self._goal_friends
             
     def isAdjacent(self, adj):
         return adj in self._adjacents
@@ -218,6 +202,7 @@ class Vertex(Duals):
         self._spin = 1 if spin > 0 else -1
         self._friends = [None for x in range(self.getSides())]
         self._adjacents = [None for x in range(self.getSides())]
+        self._goal_friends = self.getSides()
         
         Polytope.all_polytopes[Vertex].add(self)
         
@@ -274,7 +259,7 @@ class Vertex(Duals):
                     new_heading = PI + prev_angle
                     vert = Vertex(self._biome, new_pos, new_heading, self._biome.swap(self._state[0], idx), -self._spin)
                 self._adjacents[raw_idx] = vert
-                self._friends[raw_idx].addAdjacent(vert)
+                self._friends[raw_idx].addFriend(vert)
                 
             # Second (technically 'first') part of turning angle increment
             angle += self._spin * self._biome.getVertexAngle(self._state[0], idx) / 2
@@ -330,6 +315,7 @@ class Face(Duals):
         Duals.__init__(self, Face, biome, position, heading_, state)
         self._friends = set({})
         self._adjacents = set({})
+        self._goal_friends = self.getSides()
         
         Polytope.all_polytopes[Face].add(self)
         
@@ -349,6 +335,18 @@ class Face(Duals):
         """
         if friend is not None:
             self._friends.add(friend)
+            
+    def fullyGenerate(self):
+        """
+        Generate all friend vertices!
+        """
+        loop_count = 0
+        while self.isPartiallyGenerated():
+            assert loop_count < 100, "Something went wrong - stuck in an infinite generation loop!"
+            loop_count += 1
+            for friend in self._friends:
+                if friend.isPartiallyGenerated():
+                    friend.generate(depth=2)
     
     def highlight(self):
         if self.getAttributes().isPassable():
