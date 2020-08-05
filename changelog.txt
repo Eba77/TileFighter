@@ -1,3 +1,8 @@
+0.2c Alpha
+
+- Moved to new generation system that is more flexible
+- Infinite generation temporarily broken
+
 0.2b Alpha
 
 - Re-added colors to all old biomes that had them
