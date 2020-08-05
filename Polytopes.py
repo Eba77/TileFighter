@@ -68,10 +68,30 @@ class Polytope:
 @definePolytope
 class Edge(Polytope):
     """
-    Edges are currently ignored in the generation process
-    But in the future I'd like that to change!
+    Edges are initially defined as pairs of Vertices
+    Their Face pairs are calculated later
+    It should be easy to swap between using the two
     """
-    pass
+    
+    def __init__(self, v1, v2):
+        self._vertices = (v1, v2)
+        self._faces = None
+        
+    def isPartiallyGenerated(self):
+        return self._faces is not None
+    
+    def fullyGenerate(self):
+        """
+        The two faces will be the faces that the two vertices
+        have in common.
+        """
+        v1, v2 = self._vertices
+        v1.generate(depth=2)
+        v2.generate(depth=2)
+        options = [face for face in v1 if face in v2]
+        assert len(options) == 2, "Somethin' funky goin' on with them there faces..."
+        self._faces = (options[0], options[1])
+        
     
 class Duals(Polytope):
     """
