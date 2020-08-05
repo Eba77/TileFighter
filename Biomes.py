@@ -172,3 +172,11 @@ class TEST_3_3_3_3_3_3_and_3_4_3_4_3(Biome):
     
     def __init__(self):
         Biome.__init__(self, VertexConfiguration([[3] * 6, [3, 4, 3, 4, 3]]), "???", [color(255, 255, 255, 255)] * 6)
+        
+    def getTileAttributes(self, sides):
+        """
+        Fancy Foliage if triangle, otherwise Tree!
+        """
+        if sides == 3:
+            return FancyFoliage()
+        return HexForestTree()
