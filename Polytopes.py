@@ -200,9 +200,9 @@ class Vertex(Duals):
         """
         Duals.__init__(self, Vertex, biome, position, heading_, state)
         self._spin = 1 if spin > 0 else -1
-        self._friends = [None for x in range(self.getSides())]
-        self._adjacents = [None for x in range(self.getSides())]
         self._goal_friends = self.getSides()
+        self._friends = [None for x in range(self._goal_friends)]
+        self._adjacents = [None for x in range(self._goal_friends)]
         
         Polytope.all_polytopes[Vertex].add(self)
         
@@ -345,8 +345,8 @@ class Face(Duals):
             assert loop_count < 100, "Something went wrong - stuck in an infinite generation loop!"
             loop_count += 1
             for friend in self._friends:
-                if friend.isPartiallyGenerated():
-                    friend.generate(depth=2)
+                #if friend.isPartiallyGenerated(): # < - for some reason, doesn't work with this condition.  TODO: why?
+                friend.generate(depth=2)
     
     def highlight(self):
         if self.getAttributes().isPassable():

@@ -24,7 +24,7 @@ def setup():
     global current_tile, player
     fullScreen()
     frameRate(60)
-    first_vertex = Vertex(HEX_FOREST(), [0, 0], 0, (0, 0), 1)
+    first_vertex = Vertex(TEST_3_3_3_3_3_3_and_3_4_3_4_3(), [0, 0], 0, (0, 0), 1)
     first_vertex.generate(depth=5)
     current_tile = first_vertex.getFriends()[0]
     player = Player(current_tile._position)
