@@ -192,7 +192,12 @@ class Tile:
         """
         if len(cls.all_tiles) == 0:
             return None
-        return min(cls.all_tiles, key=lambda t: sqrt(square_dist(pos, t._position))/t.getApothem())
+        close_tiles = sorted(cls.all_tiles, key=lambda t: square_dist(pos, t._position))
+        for tile in close_tiles:
+            if evenOddRule(tile._position, [vert.getPosition() for vert in tile.getMonotonicVertices()]):
+                return tile
+        return None
+        #return min(cls.all_tiles, key=lambda t: sqrt(square_dist(pos, t._position))/t.getApothem())
     
     def __init__(self, b, p, r, p_in_v, d_ang, verts):
         self._biome = b

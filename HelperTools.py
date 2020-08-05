@@ -76,8 +76,8 @@ the negative draw angle.  Gives an interesting look!
     
 def irregularPolygon(pos, points, in_fill = None, in_stroke = None):
     """
-    Draws a regular polygon of radius `radius`, with `npoints` sides,
-    at position `pos`, with fill/stroke in `in_fill`/`in_stroke`
+    Draws an irregular polygon with vertices at `points`
+    Warning; doesn't work for nonconvex polygons
     """
     pushMatrix()
     translate(*pos)
@@ -90,4 +90,23 @@ def irregularPolygon(pos, points, in_fill = None, in_stroke = None):
         vertex(*p)
     endShape(CLOSE)
     popMatrix()
+    
+def evenOddRule(pos, points):
+    """
+    By checking the Even-Odd Rule, we can determine
+    whether or not `pos` lies in the convex polygon defined
+    by `points`!
+    This is taken from Wikipedia https://en.wikipedia.org/wiki/Even%E2%80%93odd_rule
+    """
+    num = len(points)
+    i = 0
+    j = num - 1
+    c = False
+    x, y = pos[0], pos[1]
+    for i in range(num):
+        if (((points[i][1] > y) != (points[j][1] > y))
+          and (x < points[i][0] + (points[j][0] - points[i][0]) * (y - points[i][1]) / (points[j][1] - points[i][1]))):
+            c = not c
+        j = i
+    return c
     
