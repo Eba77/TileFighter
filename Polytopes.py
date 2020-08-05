@@ -12,110 +12,253 @@ from HelperTools import *
 from MagicNumbers import *
 import math
 
-class Polytope:
-    pass
-    
-class Edge(Polytope):
-    pass
+def definePolytope(poly):
+    """
+    Initializes a polytope, should be used as a decorator
+    above the end-level polytope classes
+    """
+    Polytope.all_polytopes[poly] = set({})
+    return poly
 
-class Vertex(Polytope):
-    all_vertices = set({})
+class Polytope:
+    all_polytopes = dict({})
     
     @classmethod
-    def getAllVerticesNear(cls, pos, epsilon):
-        return {v for v in cls.all_vertices if square_dist(pos, v._position) < epsilon**2}
+    def getPolytopesNear(cls, pos, epsilon):
+        """
+        Note that this can be called as Vertex.getPolytopesNear(...),
+        and that is the method to get all examples of a specific polytope!
+        """
+        return {p for p in Polytope.all_polytopes[cls] if square_dist(pos, p.getPosition()) < epsilon**2}
     
     @classmethod
-    def getNearestVertexWithin(cls, pos, epsilon):
+    def getNearestPolytopeWithin(cls, pos, epsilon):
         """
-        Returns None if no vertex within epsilon
+        Returns None if no polytope within epsilon
         """
-        if len(cls.all_vertices) == 0:
+        if len(Polytope.all_polytopes[cls]) == 0:
             return None
-        to_return = min(cls.all_vertices, key=lambda v: square_dist(pos, v._position))
-        if square_dist(pos, to_return._position) < epsilon**2:
+        to_return = min(Polytope.all_polytopes[cls], key=lambda v: square_dist(pos, v.getPosition()))
+        if square_dist(pos, to_return.getPosition()) < epsilon**2:
             return to_return
         return None
     
-    def __init__(self, b, p, h, def_tup, s):
-        """
-        Heading is the starting angle it uses when placing vertices
-        Index offset is the starting part of the Vertex Config that it uses
-        Spin should be 1 or -1 and indicates direction around itself to travel
-        when placing tiles
-        `def_tup` is the (vertex type, edge numeral) pair
-        """
-        self._biome = b
-        self._position = p
-        self._heading = math.fmod(h, TWO_PI)
-        self._vertex_type = def_tup[0]
-        self._index_offset = def_tup[1]
-        self._tiles = [None for x in range(self._biome.getTileNumAtVertex(self._vertex_type))]
-        self._spin = 1 if s > 0 else -1
-        
-        # List of vertices connected to this by an edge
-        # Position 0 is vertex between -1th and 0th adjacent tile
-        self._friend_vertices = [None for x in range(self._biome.getTileNumAtVertex(self._vertex_type))]
-        
-        Vertex.all_vertices.add(self)
+    @classmethod
+    def getPolytopeOn(cls, pos):
+        raise NotImplementedError
+    
+    def __init__(self, biome, position):
+        self._biome = biome
+        self._position = position
+        self._attributes = self._biome.getTileAttributes(0) # Placeholder for now
         
     def getPosition(self):
         return self._position
     
+    def getBiome(self):
+        return self._biome
+    
+    def getAttributes(self):
+        return self._attributes
+    
+    def damage(self, how_much):
+        if self._attributes.isDestructible():
+            self._attributes = self._attributes.destroy()
+    
+@definePolytope
+class Edge(Polytope):
+    """
+    Edges are currently ignored in the generation process
+    But in the future I'd like that to change!
+    """
+    pass
+    
+class Duals(Polytope):
+    """
+    This class captures the interrelated nature between Vertices and Faces!
+    """
+    
+    @classmethod
+    def getPolytopeOn(cls, pos):
+        """
+        Gets the polytope that the position pos is on
+        Returns None if not on a tile
+        """
+        relevants = Polytope.all_polytopes[cls]
+        if len(relevants) == 0:
+            return None
+        close_topes = sorted(relevants, key=lambda t: square_dist(pos, t.getPosition()))
+        for tope in close_topes:
+            if evenOddRule(tope.getPosition(), [dual_tope.getPosition() for dual_tope in tope.getMonotonicFriends()]):
+                return tope
+        return None
+    
+    def getDual(self):
+        if isinstance(self, Vertex):
+            return Face
+        elif isinstance(self, Face):
+            return Vertex
+        else:
+            raise NotImplementedError
+            
+    def getSides(self):
+        raise NotImplementedError
+            
+    def __init__(self, cls, biome, position, heading_, state):
+        """
+        `state` is the SigmaSwaps-relevant pair
+        `spin` is clockwise/counterclockwise drawing indicator
+        `_adjacents` are the polytopes of the same type as this that are connected
+        `_friends` are the polytopes of the opposite type that are adjacent
+            As an example, the vertices on a face are the friends of that face
+        `_edges`  are the edges related to this polytope!
+        """
+        Polytope.__init__(self, biome, position)
+        self._heading = math.fmod(heading_, TWO_PI)
+        self._state = state
+        self._adjacents = []
+        if cls == Vertex:
+            amount = self._biome.getTileNumAtVertex(self._state[0])
+        elif cls == Face:
+            amount = self._biome.getConfig()[self._state[0]][self._state[1]]
+        self._friends = [None for x in range(amount)]
+        self._adjacents = [None for x in range(amount)]
+        self._edges = [None for x in range(amount)]
+    
+    def getMonotonic(self, to_be_monotonized):
+        """
+        Returns a list of vertices, sorted in terms of their angle away from center
+        This will only work for CONVEX polygons!
+        (Well, okay, it will work for nonconvex too, it just won't be useful; two
+        adjacent vertices in the list won't necessarily be connected if nonconvex)
+        
+        Note, if we are a vertex, this will return a list of 'faces', but its best
+        thought of as returning the vertices of this vertex-face in the dual tiling.
+        """
+        return sorted(
+            list(to_be_monotonized),
+            key=lambda friend: atan2(
+                friend.getPosition()[1] - self._position[1],
+                friend.getPosition()[0] - self._position[0]
+            )
+        )
+        return to_return
+        
+    def getAdjacents(self):
+        return self._adjacents
+    
+    def getFriends(self):
+        return self._friends
+    
     def isPartiallyGenerated(self):
         """
-        If this vertex doesn't have all friends generated
+        Return true if not all friends have been generated
+        Figure this out later
         """
-        return (
-            len([vert for vert in self._friend_vertices if vert is None]) > 0
-            or len([tile for tile in self._tiles if tile is None]) > 0
-        )
+        return False
+    
+    def fullyGenerate(self):
+        """
+        Generate all adjacent vertices!
+        """
+        if isinstance(self, Vertex):
+            # TODO: Make generation method work both ways?
+            # Or move this into Face.
+            raise NotImplementedError
+        loop_count = 0
+        while self.isPartiallyGenerated():
+            assert loop_count < 100, "Something went wrong - stuck in an infinite generation loop!"
+            loop_count += 1
+            for friend in self._friends:
+                if friend.isPartiallyGenerated():
+                    friend.generate(depth=2)
+            
+    def isAdjacent(self, adj):
+        return adj in self._adjacents
+            
+    def isFriend(self, friend):
+        return friend in self._friends
+    
+    """
+    These three are calculated directly from the geometry
+    """
+    def getTurningAngle(self):
+        raise NotImplementedError
+        #return self._biome.getTurningAngle(*self._position_in_vertex)
+    
+    def getApothem(self):
+        """
+        Similar to radius, heads to center of edge rather than center of dual
+        """
+        raise NotImplementedError
+        #return self.getRadius() * cos(self.getTurningAngle() / 2)
+    
+    def getRadius(self):
+        raise NotImplementedError
+        #return self._radius
+    
+@definePolytope
+class Vertex(Duals):
+    """
+    Vertices are the primary generator of our tilings.
+    They are the dual of Faces.
+    """
+    
+    def __init__(self, biome, position, heading_, state, spin):
+        """
+        `state` is the SigmaSwaps-relevant pair
+        `spin` is clockwise/counterclockwise drawing indicator
+        """
+        Duals.__init__(self, Vertex, biome, position, heading_, state)
+        self._spin = 1 if spin > 0 else -1
         
-    def generateTiles(self, depth):
+        Polytope.all_polytopes[Vertex].add(self)
+        
+    def getSides(self):
+        return len(self._biome.getConfig()[self._state[0]])
+        
+    def generate(self, depth):
         angle = self._heading
-        for raw_idx, val in enumerate(self._tiles):
+        for raw_idx, val in enumerate(self._friends):
             # `raw_idx` indicates array position,
             # `idx` is position in vertex configuration
-            idx = (raw_idx  + self._index_offset) % len(self._tiles)
+            idx = (raw_idx  + self._state[1]) % len(self._friends)
             # Turning angle increment, split up into two parts
             # because it is affected by both current tile, and previous tile!
             # (technically this is the 'second' part, since loop is cyclical)
             prev_angle = angle # used for friend vertex calculation
-            angle += self._spin * self._biome.getVertexAngle(self._vertex_type, idx) / 2
-            radius = self._biome.getRadius(self._vertex_type, idx)
-            side_length = self._biome.getSideLength(self._vertex_type, idx)
+            angle += self._spin * self._biome.getVertexAngle(self._state[0], idx) / 2
+            radius = self._biome.getRadius(self._state[0], idx)
+            side_length = self._biome.getSideLength(self._state[0], idx)
             if val is None:
                 new_pos = [
                     cos(angle) * radius + self._position[0],
                     sin(angle) * radius + self._position[1]
                 ]
-                tile = Tile.getNearestTileWithin(new_pos, CLOSENESS_CONSTANT)
+                tile = Face.getNearestPolytopeWithin(new_pos, CLOSENESS_CONSTANT)
                 if tile is None:
-                    tile = Tile(
+                    tile = Face(
                         self._biome,
                         new_pos,
-                        radius,
-                        (self._vertex_type, idx),
                         angle,
-                        {self}
+                        (self._state[0], idx),
                     )
-                else:
-                    tile.addVertex(self)
-                self._tiles[raw_idx] = tile
+                tile._friends[0] = self # Not sure if this is a good indexing?
+                self._friends[raw_idx] = tile
             else:
                 val.addVertex(self)
             if raw_idx > 0:
                 # Make tiles adjacent to eachother correctly
                 # note that addAdjacent works two-ways, but is a set
                 # so no worries about duplicates.
-                self._tiles[raw_idx].addAdjacent(self._tiles[raw_idx-1])
+                self._friends[raw_idx].addAdjacent(self._friends[raw_idx-1])
                 
                 # Add vertices at tile intersections
                 new_pos = [
                     cos(prev_angle) * side_length + self._position[0],
                     sin(prev_angle) * side_length + self._position[1]
                 ]
-                vert = Vertex.getNearestVertexWithin(new_pos, CLOSENESS_CONSTANT)
+                vert = Vertex.getNearestPolytopeWithin(new_pos, CLOSENESS_CONSTANT)
                 if vert is None:
                     """
                     Calculating the heading requires drawing out a diagram to figure out,
@@ -123,31 +266,31 @@ class Vertex(Polytope):
                     but it's hard to explain englishically)
                     """
                     new_heading = PI + prev_angle
-                    vert = Vertex(self._biome, new_pos, new_heading, self._biome.swap(self._vertex_type, idx), -self._spin)
-                self._friend_vertices[raw_idx] = vert
-                self._tiles[raw_idx].addVertex(vert)
+                    vert = Vertex(self._biome, new_pos, new_heading, self._biome.swap(self._state[0], idx), -self._spin)
+                self._adjacents[raw_idx] = vert
+                self._friends[raw_idx].addAdjacent(vert)
                 
             # Second (technically 'first') part of turning angle increment
-            angle += self._spin * self._biome.getVertexAngle(self._vertex_type, idx) / 2
+            angle += self._spin * self._biome.getVertexAngle(self._state[0], idx) / 2
            
         # Match up beginning with end
-        self._tiles[0].addAdjacent(self._tiles[-1])
+        self._friends[0].addAdjacent(self._friends[-1])
         new_pos = [
             cos(angle) * side_length + self._position[0],
             sin(angle) * side_length + self._position[1]
         ]
-        vert = Vertex.getNearestVertexWithin(new_pos, CLOSENESS_CONSTANT)
+        vert = Vertex.getNearestPolytopeWithin(new_pos, CLOSENESS_CONSTANT)
         if vert is None:
             new_heading = PI + angle
             vert = Vertex(self._biome, new_pos, new_heading, self._biome.swap(self._vertex_type, self._index_offset), -self._spin)
-        self._friend_vertices[0] = vert
-        self._tiles[0].addVertex(vert)
+        self._adjacents[0] = vert
+        self._friends[0].addVertex(vert)
         
         # Recursive generation!
         if depth > 1:
-            for vert in self._friend_vertices:
-                vert.generateTiles(depth-1)
-        
+            for vert in self._adjacents:
+                vert.generate(depth-1)
+                
     def drawVertex(self):
         """
         Really should only be used for debugging!
@@ -164,124 +307,31 @@ class Vertex(Polytope):
         stroke(0, 255, 0)
         line(0, 0, 30 * cos(self._heading), 30 * sin(self._heading))
         popMatrix()
-                    
-                
-    def __getitem__(self, n):
-        return self._tiles[n]
-
-class Tile(Polytope):
-    all_tiles = set({})
-    
-    @classmethod
-    def getAllTilesNear(cls, pos, epsilon):
-        return {v for v in cls.all_tiles if square_dist(pos, v._position) < epsilon**2}
-    
-    @classmethod
-    def getNearestTileWithin(cls, pos, epsilon):
-        """
-        Returns None if no tile within epsilon
-        """
-        if len(cls.all_tiles) == 0:
-            return None
-        to_return = min(cls.all_tiles, key=lambda t: square_dist(pos, t._position))
-        if square_dist(pos, to_return._position) < epsilon**2:
-            return to_return
-        return None
-    
-    @classmethod
-    def getTileOn(cls, pos):
-        """
-        Gets the tile that the position pos is on
-        Note that distances from a tile are weighted by radius
-        This won't be possible for irregular tilings :/
-        Returns None if not on a tile
-        """
-        if len(cls.all_tiles) == 0:
-            return None
-        close_tiles = sorted(cls.all_tiles, key=lambda t: square_dist(pos, t._position))
-        for tile in close_tiles:
-            if evenOddRule(tile._position, [vert.getPosition() for vert in tile.getMonotonicVertices()]):
-                return tile
-        return None
-        #return min(cls.all_tiles, key=lambda t: sqrt(square_dist(pos, t._position))/t.getApothem())
-    
-    def __init__(self, b, p, r, p_in_v, d_ang, verts):
-        self._biome = b
-        self._position = p
-        self._radius = r
-        self._position_in_vertex = p_in_v
-        self._adjacents = set({})
-        self._vertices = verts
-        self._draw_angle = d_ang
-        self._attributes = self._biome.getTileAttributes(self.getSides())
-        Tile.all_tiles.add(self)
         
-    def getMonotonicVertices(self):
-        """
-        Returns a list of vertices, sorted in terms of their angle away from center
-        This will only work for CONVEX polygons!
-        (Well, okay, it will work for nonconvex too, it just won't be useful; two
-        adjacent vertices in the list won't necessarily be connected if nonconvex)
-        """
-        to_return = list(self._vertices)
-        to_return.sort(
-            key=lambda vert: atan2(
-                vert.getPosition()[1] - self._position[1],
-                vert.getPosition()[0] - self._position[0]
-            )
-        )
-        return to_return
-        
-        
-    def damage(self, how_much):
-        if self._attributes.isDestructible():
-            self._attributes = self._attributes.destroy()
-        
-    def getAdjacents(self):
-        return self._adjacents
+@definePolytope
+class Face(Duals):
+    """
+    Faces are the dual of Vertices
+    The game mostly takes place on faces
+    (noteable exception being the Dual Dimension (TODO))
+    """
     
-    def isPartiallyGenerated(self):
+    def __init__(self, biome, position, heading_, state):
         """
-        If this tile doesn't have all adjacencies filled!
+        `state` is the SigmaSwaps-relevant pair
         """
-        return len([x for x in self._vertices if x.isPartiallyGenerated()]) > 0
-    
-    def fullyGenerate(self):
-        """
-        Generate all adjacent vertices!
-        """
-        loop_count = 0
-        while self.isPartiallyGenerated():
-            assert loop_count < 100, "Something went wrong - stuck in an infinite generation loop!" + str(self.getSides()) + ";" + str(len(self._vertices)) + ";" + str(len(self._adjacents))
-            loop_count += 1
-            for vert in self._vertices:
-                if vert.isPartiallyGenerated():
-                    vert.generateTiles(depth=2)
-
+        Duals.__init__(self, Face, biome, position, heading_, state)
+        Polytope.all_polytopes[Face].add(self)
         
-    def addAdjacent(self, adj):
-        if adj is not None:
-            self._adjacents.add(adj)
-            adj._adjacents.add(self)
-            
-    def addVertex(self, vert):
-        """
-        Unlike `addAdjacent`, this is not a reciprocal function;
-        adding a vertex to a tile doesn't add tile to vertex
-        """
-        #print "AHHHH", vert, vert in self._vertices
-        if vert is not None:
-            self._vertices.add(vert)
-  
-    def getPosition(self):
-        return self._position
-    
     def getSides(self):
-        return self._biome.getSides(*(self._position_in_vertex))
+        return self._biome.getSides(*(self._state))
     
-    def getAttributes(self):
-        return self._attributes
-  
+    def highlight(self):
+        if self.getAttributes().isPassable():
+            self.drawTile(0, color(255, 255, 0, 100))
+        else:
+            self.drawTile(0, color(255, 0, 0, 100))
+            
     def drawTile(self, depth, highlight = None):
         """
         Draws this tile, and all times within `depth`
@@ -294,54 +344,36 @@ class Tile(Polytope):
         pushMatrix()
         translate(self._position[0], self._position[1])
         stroke(0)
-        regularPolygon(
+        irregularPolygon(
             [0, 0],
-            self._radius,
-            self.getSides(),
-            self._draw_angle,
+            [
+                [
+                    x.getPosition()[0] - self._position[0],
+                    x.getPosition()[1] - self._position[1]
+                ]
+                for x in self.getMonotonicVertices()
+            ],
             self._attributes.getColor(),
             self._attributes.getStroke()
         )
-        """irregularPolygon(
-            [0, 0],
-            [[x.getPosition()[0] - self._position[0], x.getPosition()[1] - self._position[1]] for x in self.getMonotonicVertices()],
-            self._attributes.getColor(),
-            self._attributes.getStroke()
-        )"""
         if highlight is not None:
-            regularPolygon(
+            irregularPolygon(
                 [0, 0],
-                self._radius * 0.5,
-                self.getSides(),
-                self._draw_angle,
-                highlight
+                [
+                    [
+                        (x.getPosition()[0] - self._position[0]) * 0.5,
+                        (x.getPosition()[1] - self._position[1]) * 0.5
+                    ]
+                    for x in self.getMonotonicVertices()
+                ],
+                self._attributes.getColor(),
+                self._attributes.getStroke()
             )
         popMatrix()
         if DRAW_VERTICES:
-            for vert in self._vertices:
+            for vert in self._friends:
                 vert.drawVertex()
         if depth > 1:
             for adj in self._adjacents:
                 if adj is not None:
                     adj.drawTile(depth - 1)
-        
-    def getTurningAngle(self):
-        return self._biome.getTurningAngle(*self._position_in_vertex)
-    
-    def getApothem(self):
-        """
-        Similar to radius, heads to center of side rather than vertex
-        """
-        return self.getRadius() * cos(self.getTurningAngle() / 2)
-    
-    def getRadius(self):
-        return self._radius
-    
-    def highlight(self):
-        if self.getAttributes().isPassable():
-            self.drawTile(0, color(255, 255, 0, 100))
-        else:
-            self.drawTile(0, color(255, 0, 0, 100))
-            
-    def isAdjacent(self, adj):
-        return adj in self._adjacents

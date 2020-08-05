@@ -22,8 +22,11 @@ class Biome:
         self._base_radius = [100] * len(v_conf)
         Biome.cur_id += 1
   
-    def getSides(self, v, e):
-        return self._vertex_configuration[v][e]
+    """def getSides(self, v, e):
+        return self._vertex_configuration[v][e]"""
+    
+    def getConfig(self):
+        return self._vertex_configuration
   
     def getTileNumAtVertex(self, v):
         """
@@ -60,6 +63,7 @@ class Biome:
         the other two vertices resting on a single side of the polygon
         (so for example a square should have 90°, hexagon should have 60°)
         """
+        print self._vertex_configuration._raw_config, v, e
         return TWO_PI / self._vertex_configuration[v][e]
     
     def getVertexAngle(self, v, e):
