@@ -24,7 +24,7 @@ def setup():
     global current_tile, player
     fullScreen()
     frameRate(60)
-    first_vertex = Vertex(PLEASANT_PLAINS(), [0, 0], 0, (0, 0), 1)
+    first_vertex = Vertex(DANGEROUS_DESERT(), [0, 0], 0, (0, 0), 1)
     first_vertex.generateTiles(depth=5)
     current_tile = first_vertex[0]
     player = Player(current_tile._position)

@@ -120,6 +120,12 @@ class DANGEROUS_DESERT(Biome):
     
     def __init__(self):
         Biome.__init__(self, VertexConfiguration([[3] * 6]), "Dangerous Desert", [color(161, 199, 37 + 20 * i, 255) for i in range(6)])
+        
+    def getTileAttributes(self, sides):
+        """
+        Always FancyFoliage (later change to fit desert theme)
+        """
+        return FancyFoliage()
 
 class TEST_8_8_4(Biome):
     

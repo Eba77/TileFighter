@@ -123,3 +123,12 @@ class FancyFloor(Passable):
         Passable.__init__(self)
         self._color = rnd.choice([color(255, 200, 0, 255), color(255, 0, 0, 255)])
         self._stroke = color(0)
+        
+class FancyFoliage(Passable):
+    """
+    Just another flavor of basic tile, colors chosen at random from set
+    """
+    def __init__(self):
+        Passable.__init__(self)
+        self._color = rnd.choice([color(161, 199, 37 + 20 * i, 255) for i in range(6)])
+        self._stroke = color(0)
