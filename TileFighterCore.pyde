@@ -53,7 +53,7 @@ def draw():
     background(150)
     partialGens = set({})
     for tile in Polytope.all_polytopes[Face]:
-        if posOnScreen(tile.getPosition(), tile.getRadius()):
+        if posOnScreen(tile.getPosition(), tile.getAverageRadius()):
             tile.drawTile(depth=1)
             if tile.notCompletelyGenerated() or tile.missingEdges():
                 partialGens.add(tile)

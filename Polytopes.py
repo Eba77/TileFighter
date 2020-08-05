@@ -231,16 +231,17 @@ class Duals(Polytope):
         The `edge` specifies which pair of friends to get
         """
         friend1, friend2 = edge._vertices if isinstance(self, Face) else edge._faces
+        pos1 = friend1.getPosition()
+        pos2 = friend2.getPosition()
         return abs(atan2(
-            friend1[1] - friend2[1],
-            friend1[0] - friend2[0]
+            pos1[1] - pos2[1],
+            pos1[0] - pos2[0]
         ))
         #return self._biome.getTurningAngle(*self._position_in_vertex)
     
     def getApothem(self, edge):
         """
         Similar to radius, heads to center of edge rather than center of dual
-        This is easier to calculate so we acutally derive the radius from it!
         """
         edge_center = edge.getPosition()
         return sqrt(square_dist(edge_center, self.getPosition()))
@@ -253,16 +254,33 @@ class Duals(Polytope):
         avg = lambda x: sum(x, 0) / len(x)
         return avg([self.getApothem(x) for x in self._edges])
     
-    def getRadius(self):
-        return 100
-        raise NotImplementedError
-        #return self._radius
+    def getRadius(self, edge):
+        """
+        Average of distances to left and right verts
+        """
+        v1, v2 = edge._vertices
+        p1 = v1.getPosition()
+        p2 = v2.getPosition()
+        d1 = sqrt(square_dist(p1, self.getPosition()))
+        d2 = sqrt(square_dist(p2, self.getPosition()))
+        return (d1 + d2) / 2
+        
+    def getAverageRadius(self):
+        if self.missingEdges():
+            # This is the case when a tile isn't fully generated yet
+            # but still needs to give a radius to check if it is on screen
+            return 250
+        avg = lambda x: sum(x, 0) / len(x)
+        return avg([self.getRadius(x) for x in self._edges])
         
     def getSides(self):
         if isinstance(self, Vertex):
             amount = self._biome.getTileNumAtVertex(self._state[0])
         elif isinstance(self, Face):
             amount = self._biome.getConfig()[self._state[0]][self._state[1]]
+            
+    def missingEdges(self):
+        return len(self._edges) < self._goal_friends
     
 @definePolytope
 class Vertex(Duals):
@@ -446,9 +464,6 @@ class Face(Duals):
             # See if this completes the set!  Generate now.
             if not self.notCompletelyGenerated():
                 self._attributes = self._biome.getTileAttributes(self.getSides(), self._adjacents)
-                
-    def missingEdges(self):
-        return len(self._edges) < self._goal_friends
             
     def fullyGenerate(self):
         """
