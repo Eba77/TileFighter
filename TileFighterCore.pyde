@@ -13,7 +13,7 @@ import itertools
 import math
 from Biomes import *
 from HelperTools import *
-from Polytope import *
+from Polytopes import *
 from Objects import *
 from PlayerFile import *
 

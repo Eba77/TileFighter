@@ -1,4 +1,4 @@
-from Polytope import *
+from Polytopes import *
 from HelperTools import *
 
 """
