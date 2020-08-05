@@ -73,12 +73,15 @@ class Edge(Polytope):
     It should be easy to swap between using the two
     """
     
-    def __init__(self, v1, v2):
+    def __init__(self, biome, v1, v2):
+        p1 = v1.getPosition()
+        p2 = v2.getPosition()
+        Polytope.__init__(self, biome, [(p1[0] + p2[0]) / 2, (p1[1] + p2[1]) / 2])
         self._vertices = (v1, v2)
         self._faces = None
         
     def isPartiallyGenerated(self):
-        return self._faces is not None
+        return self._faces is None
     
     def fullyGenerate(self):
         """
@@ -88,7 +91,7 @@ class Edge(Polytope):
         v1, v2 = self._vertices
         v1.generate(depth=2)
         v2.generate(depth=2)
-        options = [face for face in v1 if face in v2]
+        options = [face for face in v1._friends if face in v2._friends]
         assert len(options) == 2, "Somethin' funky goin' on with them there faces..."
         self._faces = (options[0], options[1])
         
@@ -224,11 +227,27 @@ class Vertex(Duals):
         self._goal_friends = self.getSides()
         self._friends = [None for x in range(self._goal_friends)]
         self._adjacents = [None for x in range(self._goal_friends)]
+        self._edges = []
         
         Polytope.all_polytopes[Vertex].add(self)
         
     def getSides(self):
         return len(self._biome.getConfig()[self._state[0]])
+    
+    def addAdjacent(self, idx, adj):
+        """
+        Note that this is NOT mutual
+        This is because _adjacents needs to be in a
+        specific order that is too hard to maintain if
+        mutual...
+        """
+        if not self.isAdjacent(adj):
+            # If this is the first time they've been connected,
+            # create an edge for the both of them!
+            e = Edge(self._biome, self, adj)
+            self._edges.append(e)
+            adj._edges.append(e)
+        self._adjacents[idx] = adj
             
     def addFriend(self, idx, friend):
         """
@@ -290,7 +309,7 @@ class Vertex(Duals):
                     """
                     new_heading = PI + prev_angle
                     vert = Vertex(self._biome, new_pos, new_heading, self._biome.swap(self._state[0], idx), -self._spin)
-                self._adjacents[raw_idx] = vert
+                self.addAdjacent(raw_idx, vert)
                 self._friends[raw_idx].addFriend(vert)
                 
             # Second (technically 'first') part of turning angle increment
@@ -307,7 +326,7 @@ class Vertex(Duals):
         if vert is None:
             new_heading = PI + angle
             vert = Vertex(self._biome, new_pos, new_heading, self._biome.swap(*self._state), -self._spin)
-        self._adjacents[0] = vert
+        self.addAdjacent(0, vert)
         self._friends[0].addFriend(vert)
         
         # Recursive generation!
@@ -384,6 +403,13 @@ class Face(Duals):
             for friend in self._friends:
                 #if friend.isPartiallyGenerated(): # < - for some reason, doesn't work with this condition.  TODO: why?
                 friend.generate(depth=2)
+                
+        # Now generate all its edges
+        # Note that ungenerated edges lie with vertices, not faces
+        for friend in self._friends:
+            for edge in friend._edges:
+                if edge.isPartiallyGenerated():
+                    edge.fullyGenerate()
     
     def highlight(self):
         if self.getAttributes().isPassable():
