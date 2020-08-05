@@ -50,7 +50,7 @@ class Polytope:
     def __init__(self, biome, position):
         self._biome = biome
         self._position = position
-        self._attributes = self._biome.getTileAttributes(0) # Placeholder for now
+        self._attributes = None # Override in subclasses
         
     def getPosition(self):
         return self._position
@@ -121,6 +121,7 @@ class Duals(Polytope):
         self._adjacents = None
         self._edges = None
         self._goal_friends = None # Amount of friends we need to reach
+        self._attributes = biome.getTileAttributes(self.getSides())
     
     def getMonotonic(self, to_be_monotonized):
         """
