@@ -15,11 +15,10 @@ import random as rnd
 class Biome:
     cur_id = 0
     
-    def __init__(self, v_conf, n, col):
+    def __init__(self, v_conf, n):
         self._biome_id = Biome.cur_id
         self._vertex_configuration = v_conf
         self._name = n
-        self._colors = col
         self._base_radius = [100] * len(v_conf)
         Biome.cur_id += 1
   
@@ -34,9 +33,6 @@ class Biome:
   
     def getBiomeName(self):
         return self._name
-    
-    def getTileColor(self, position_in_vertex):
-        return self._colors[position_in_vertex[1]]
     
     def __eq__(self, other):
         return self._biome_id == other._biome_id
@@ -92,7 +88,7 @@ class Biome:
 class HEX_FOREST(Biome):
     
     def __init__(self):
-        Biome.__init__(self, VertexConfiguration([[6] * 3]), "Hex Forest", [color(0, 150, 0, 255), color(40, 120, 0, 255), color(0, 190, 0, 255)])
+        Biome.__init__(self, VertexConfiguration([[6] * 3]), "Hex Forest")
         
     def getTileAttributes(self, sides):
         """
@@ -108,7 +104,7 @@ class HEX_FOREST(Biome):
 class PLEASANT_PLAINS(Biome):
     
     def __init__(self):
-        Biome.__init__(self, VertexConfiguration([[4] * 4]), "Pleasant Plains", [color(255, 200, 0, 255), color(255, 0, 0, 255)] * 2)
+        Biome.__init__(self, VertexConfiguration([[4] * 4]), "Pleasant Plains")
         
     def getTileAttributes(self, sides):
         """
@@ -119,7 +115,7 @@ class PLEASANT_PLAINS(Biome):
 class DANGEROUS_DESERT(Biome):
     
     def __init__(self):
-        Biome.__init__(self, VertexConfiguration([[3] * 6]), "Dangerous Desert", [color(161, 199, 37 + 20 * i, 255) for i in range(6)])
+        Biome.__init__(self, VertexConfiguration([[3] * 6]), "Dangerous Desert")
         
     def getTileAttributes(self, sides):
         """
@@ -130,48 +126,48 @@ class DANGEROUS_DESERT(Biome):
 class TEST_8_8_4(Biome):
     
     def __init__(self):
-        Biome.__init__(self, VertexConfiguration([[8, 8, 4]]), "???", [color(150, 150, 0, 255)] * 3)
+        Biome.__init__(self, VertexConfiguration([[8, 8, 4]]), "???")
 
 class TEST_4_6_12(Biome):
     
     def __init__(self):
-        Biome.__init__(self, VertexConfiguration([[4, 6, 12]]), "???", [color(255, 255, 255, 255)] * 3)
+        Biome.__init__(self, VertexConfiguration([[4, 6, 12]]), "???")
 
 class TEST_4_3_4_3_3(Biome):
     
     def __init__(self):
-        Biome.__init__(self, VertexConfiguration([[4, 3, 4, 3, 3]]), "???", [color(255, 255, 255, 255)] * 5)
+        Biome.__init__(self, VertexConfiguration([[4, 3, 4, 3, 3]]), "???")
 
 class TEST_3_3_3_4_4(Biome):
     
     def __init__(self):
-        Biome.__init__(self, VertexConfiguration([[3, 3, 3, 4, 4]]), "???", [color(255, 255, 255, 255)] * 5)
+        Biome.__init__(self, VertexConfiguration([[3, 3, 3, 4, 4]]), "???")
 
 class TEST_3_3_3_3_6(Biome):
     
     def __init__(self):
-        Biome.__init__(self, VertexConfiguration([[3, 3, 3, 3, 6]] * 2), "???", [color(255, 255, 255, 255)] * 5)
+        Biome.__init__(self, VertexConfiguration([[3, 3, 3, 3, 6]] * 2), "???")
         # ^^^ Chiral, so I used the vertex mirroring trick, hence why it looks 2-uniform; it is really 1-uniform
 
 class TEST_3_6_3_6(Biome):
     
     def __init__(self):
-        Biome.__init__(self, VertexConfiguration([[3, 6, 3, 6]]), "???", [color(255, 255, 255, 255)] * 4)
+        Biome.__init__(self, VertexConfiguration([[3, 6, 3, 6]]), "???")
 
 class TEST_3_4_6_4(Biome):
     
     def __init__(self):
-        Biome.__init__(self, VertexConfiguration([[3, 4, 6, 4]]), "???", [color(255, 255, 255, 255)] * 4)
+        Biome.__init__(self, VertexConfiguration([[3, 4, 6, 4]]), "???")
 
 class TEST_3_12_12(Biome):
     
     def __init__(self):
-        Biome.__init__(self, VertexConfiguration([[3, 12, 12]]), "???", [color(255, 255, 255, 255)] * 3)
+        Biome.__init__(self, VertexConfiguration([[3, 12, 12]]), "???")
 
 class TEST_3_3_3_3_3_3_and_3_4_3_4_3(Biome):
     
     def __init__(self):
-        Biome.__init__(self, VertexConfiguration([[3] * 6, [3, 4, 3, 4, 3]]), "???", [color(255, 255, 255, 255)] * 6)
+        Biome.__init__(self, VertexConfiguration([[3] * 6, [3, 4, 3, 4, 3]]), "???")
         
     def getTileAttributes(self, sides):
         """

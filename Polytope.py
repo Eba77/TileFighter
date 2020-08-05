@@ -203,7 +203,6 @@ class Tile:
         self._biome = b
         self._position = p
         self._radius = r
-        self._color = self._biome.getTileColor(p_in_v)
         self._position_in_vertex = p_in_v
         self._adjacents = set({})
         self._vertices = verts
