@@ -81,6 +81,16 @@ class StabDestructible(Destructible):
         
     def isStabDestructible(self):
         return True
+    
+class BlankTile(Passable):
+    """
+    Default tile, should not show up in final game
+    """
+    
+    def __init__(self):
+        Passable.__init__(self)
+        self._color = color(255)
+        self._stroke = color(0)
         
 class HexForestGrass(Passable):
     """

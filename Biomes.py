@@ -9,6 +9,7 @@ This file contains everything to do with the macro-scale terrain generation
 
 from Geometry import *
 from TileAttributes import *
+from MagicNumbers import *
 import random as rnd
 
 class Biome:
@@ -83,7 +84,10 @@ class Biome:
         """
         Returns a TileAttribute instance
         """
-        raise NotImplementedError
+        if LENIENT:
+            return BlankTile()
+        else:
+            raise NotImplementedError
     
 class HEX_FOREST(Biome):
     
