@@ -1,3 +1,11 @@
+0.2b Alpha
+
+- Re-added colors to all old biomes that had them
+- All biomes work again, but most with a 'default' tile
+- [3^6; (3.4)^2.3] has colors
+- Improved how the cursor recognizes which tile it is on
+- Added capability to draw irregular polygons!
+
 0.2a Alpha
 
 - Refactored how biomes worked
