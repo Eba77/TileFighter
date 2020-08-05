@@ -109,6 +109,12 @@ class PLEASANT_PLAINS(Biome):
     
     def __init__(self):
         Biome.__init__(self, VertexConfiguration([[4] * 4]), "Pleasant Plains", [color(255, 200, 0, 255), color(255, 0, 0, 255)] * 2)
+        
+    def getTileAttributes(self, sides):
+        """
+        Always FancyFloor
+        """
+        return FancyFloor()
 
 class DANGEROUS_DESERT(Biome):
     

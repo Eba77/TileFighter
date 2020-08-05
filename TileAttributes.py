@@ -114,3 +114,12 @@ class HexForestTree(StabDestructible):
         StabDestructible.__init__(self, HexForestGrass())
         self._color = color(30) # TODO: Better display choice
         self._stroke = color(0)
+        
+class FancyFloor(Passable):
+    """
+    Just another flavor of basic tile, colors chosen at random from set
+    """
+    def __init__(self):
+        Passable.__init__(self)
+        self._color = rnd.choice([color(255, 200, 0, 255), color(255, 0, 0, 255)])
+        self._stroke = color(0)
