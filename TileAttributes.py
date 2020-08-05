@@ -92,6 +92,14 @@ class BlankTile(Passable):
         self._color = color(255)
         self._stroke = color(0)
         
+class UnloadedTile(BlankTile):
+    """
+    Tile that faces will be if they're not fully loaded!
+    """
+    
+    def __init__(self):
+        BlankTile.__init__(self)
+        
 class HexForestGrass(Passable):
     """
     Simple grass, comes in three colors chosen at random.

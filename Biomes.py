@@ -79,7 +79,7 @@ class Biome:
     def getAngleOffset(self, v, e):
         return sum([self.getTurningAngle(v, _e) for _e in range(e + 1)])
     
-    def getTileAttributes(self, sides):
+    def getTileAttributes(self, sides, adjacents):
         """
         Returns a TileAttribute instance
         """
@@ -87,13 +87,25 @@ class Biome:
             return BlankTile()
         else:
             raise NotImplementedError
+            
+class MetaBiome(Biome):
+    """
+    This is the thing that handles placing the tiling of the biomes themselves
+    (not the tiles internal to the biome)
+    """
+    
+    def __init__(self, v_conf):
+        Biome.__init__(self, v_conf, "MetaBiome")
+        
+    def getTileAttributes(self, sides, adjacents):
+        return None
     
 class HEX_FOREST(Biome):
     
     def __init__(self):
         Biome.__init__(self, VertexConfiguration([[6] * 3]), "Hex Forest")
         
-    def getTileAttributes(self, sides):
+    def getTileAttributes(self, sides, adjacents):
         """
         Returns a TileAttribute instance
         Either HexForestGrass or HexForestTree
@@ -109,7 +121,7 @@ class PLEASANT_PLAINS(Biome):
     def __init__(self):
         Biome.__init__(self, VertexConfiguration([[4] * 4]), "Pleasant Plains")
         
-    def getTileAttributes(self, sides):
+    def getTileAttributes(self, sides, adjacents):
         """
         Always FancyFloor
         """
@@ -120,7 +132,7 @@ class DANGEROUS_DESERT(Biome):
     def __init__(self):
         Biome.__init__(self, VertexConfiguration([[3] * 6]), "Dangerous Desert")
         
-    def getTileAttributes(self, sides):
+    def getTileAttributes(self, sides, adjacents):
         """
         Always FancyFoliage (later change to fit desert theme)
         """
@@ -172,7 +184,7 @@ class TEST_3_3_3_3_3_3_and_3_4_3_4_3(Biome):
     def __init__(self):
         Biome.__init__(self, VertexConfiguration([[3] * 6, [3, 4, 3, 4, 3]]), "???")
         
-    def getTileAttributes(self, sides):
+    def getTileAttributes(self, sides, adjacents):
         """
         Fancy Foliage if triangle, otherwise Tree!
         """

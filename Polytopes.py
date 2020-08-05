@@ -121,7 +121,7 @@ class Duals(Polytope):
         self._adjacents = None
         self._edges = None
         self._goal_friends = None # Amount of friends we need to reach
-        self._attributes = biome.getTileAttributes(self.getSides())
+        self._attributes = UnloadedTile() # Generated once tile is fully generated!
     
     def getMonotonic(self, to_be_monotonized):
         """
@@ -209,6 +209,17 @@ class Vertex(Duals):
         
     def getSides(self):
         return len(self._biome.getConfig()[self._state[0]])
+            
+    def addFriend(self, idx, friend):
+        """
+        Note that this is NOT mutual
+        """
+        self._friends[idx] = friend
+           
+        if isinstance(self._attributes, UnloadedTile):
+            # See if this completes the set!  Generate now.
+            if not self.isPartiallyGenerated():
+                self._attributes = self._biome.getTileAttributes(self.getSides(), self._adjacents)
         
     def generate(self, depth):
         angle = self._heading
@@ -237,7 +248,7 @@ class Vertex(Duals):
                         (self._state[0], idx),
                     )
                 tile.addFriend(self)
-                self._friends[raw_idx] = tile
+                self.addFriend(raw_idx, tile) #self._friends[raw_idx] = tile
             else:
                 val.addFriend(self)
             if raw_idx > 0:
@@ -336,6 +347,11 @@ class Face(Duals):
         """
         if friend is not None:
             self._friends.add(friend)
+           
+        if isinstance(self._attributes, UnloadedTile):
+            # See if this completes the set!  Generate now.
+            if not self.isPartiallyGenerated():
+                self._attributes = self._biome.getTileAttributes(self.getSides(), self._adjacents)
             
     def fullyGenerate(self):
         """
