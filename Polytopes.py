@@ -255,7 +255,7 @@ class Duals(Polytope):
         thought of as returning the vertices of this vertex-face in the dual tiling.
         """
         return sorted(
-            list(to_be_monotonized),
+            [x for x in to_be_monotonized if x is not None],
             key=lambda friend: atan2(
                 friend.getPosition()[1] - self._position[1],
                 friend.getPosition()[0] - self._position[0]
