@@ -399,12 +399,12 @@ class Vertex(Duals):
             # because it is affected by both current tile, and previous tile!
             # (technically this is the 'second' part, since loop is cyclical)
             prev_angle = angle # used for friend vertex calculation
-            delta_ang, radius, side_length = self._biome.getVertexAngleAndRadiusAndSideLength(self._state[0], idx)
-            delta_ang *= self._spin / 2.0
-            #delta_ang = self._spin * self._biome.getVertexAngle(self._state[0], idx) / 2
+            #delta_ang, radius, side_length = self._biome.getVertexAngleAndRadiusAndSideLength(self._state[0], idx)
+            #delta_ang *= self._spin / 2.0
+            delta_ang = self._spin * self._biome.getVertexAngle(self._state[0], idx) / 2
             angle += delta_ang
-            #radius = self._biome.getRadius(self._state[0], idx)
-            #side_length = self._biome.getSideLength(self._state[0], idx)
+            radius = self._biome.getRadius(self._state[0], idx)
+            side_length = self._biome.getSideLength(self._state[0], idx)
             if val is None:
                 new_pos = [
                     cos(angle) * radius + self._position[0],

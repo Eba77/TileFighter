@@ -11,8 +11,23 @@ class cacher:
     """
     For efficiency, we want to cache certain function calls
     so that they don't need to be recomputed every time!
+    
+    Doesn't work if there are kwargs
+    Should only be used on instance and class methods
+    (as doesn't cache first arg directly, but as a string)
+    
+    Python 3.8 has similar function in standard library...
+    but this is 2.7 :/
     """
-    pass # TODO: this
+    def __init__(self):
+        self._dict = dict({})
+        
+    def __call__(self, func):
+        def cached_func(s, *args):
+            if args not in self._dict:
+                self._dict[str(s), args] = func(s, *args)
+            return self._dict[str(s), args]
+        return cached_func
 
 # Note that Python Processing is built on Jython
 # and thus we can't use certain libraries, like

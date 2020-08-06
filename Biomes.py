@@ -10,6 +10,7 @@ This file contains everything to do with the macro-scale terrain generation
 from Geometry import *
 from TileAttributes import *
 from MagicNumbers import *
+from HelperTools import *
 import random as rnd
 
 class Biome:
@@ -40,6 +41,7 @@ class Biome:
     def __eq__(self, other):
         return self._biome_id == other._biome_id
     
+    @cacher()
     def getSideLength(self, v, e):
         """
         Gets the length of the side of the polygon
@@ -48,6 +50,7 @@ class Biome:
         """
         return 2 * self.getRadius(v, 0) * sin(self.getTurningAngle(v, 0) / 2)
     
+    @cacher()
     def getRadius(self, v, e):
         """
         Calculates radius of tile at position n in config
@@ -57,6 +60,7 @@ class Biome:
             return self._base_radius[v]
         return self.getSideLength(v, e) / (2 * sin(self.getTurningAngle(v, e) / 2))
     
+    @cacher()
     def getTurningAngle(self, v, e):
         """
         Angle at center of tile in any triangle with center as vertex and then
@@ -65,6 +69,7 @@ class Biome:
         """
         return TWO_PI / self._vertex_configuration[v][e]
     
+    @cacher()
     def getVertexAngle(self, v, e):
         """
         Get angle that the two edges of the nth polygon located at this vertex form
@@ -73,10 +78,12 @@ class Biome:
         """
         return PI - self.getTurningAngle(v, e)
     
+    @cacher()
     def getVertexAngleAndRadiusAndSideLength(self, v, e):
         """
         An efficient way to calculate all three of these variables at once
         Required because Processing Python Mode is quite slow...
+        This is actually probably redundant with the introduction of cacher...
         """
         turn_ang = self.getTurningAngle(v, e)
         vert_ang = PI - turn_ang
@@ -88,9 +95,11 @@ class Biome:
         assert side_length == self.getSideLength(v, e), "Side Length Fail"
         return (vert_ang, radius, side_length)
     
+    @cacher()
     def swap(self, v, e):
         return self._vertex_configuration.swap(v, e)
     
+    @cacher()
     def getAngleOffset(self, v, e):
         return sum([self.getTurningAngle(v, _e) for _e in range(e + 1)])
     
