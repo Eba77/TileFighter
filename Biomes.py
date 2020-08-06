@@ -115,12 +115,14 @@ class MetaBiome(Biome):
                 return biome
         return _
     
-    def __init__(self, v_conf):
+    def __init__(self, v_conf, first_biome = None):
         """
         Unlike other biomes, the MetaBiome can have its tiling arbitrarily chosen!
+        If first_biome is not None, will be that biome
         """
         Biome.__init__(self, v_conf, "MetaBiome")
         self._base_radius = [1000] * len(self._vertex_configuration)
+        self._first_biome = first_biome
         
     def getTileAttributes(self, sides, adjacents):
         """
@@ -129,6 +131,8 @@ class MetaBiome(Biome):
         """
         options = [x for x in MetaBiome.options if x not in adjacents]
         assert len(options) > 0, "All outta options..."
+        if self._first_biome is not None:
+            return MetaBiome.makeMeta(self._first_biome)()
         to_return = rnd.choice(options)()
         return to_return
     

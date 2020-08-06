@@ -24,7 +24,7 @@ def setup():
     global current_tile, player
     fullScreen()
     frameRate(60)
-    first_biome_v = BiomeVertex(MetaBiome(VertexConfiguration([[3] * 6, [3, 4, 3, 4, 3]])), [0, 0], 0, (0, 0), 1)
+    first_biome_v = BiomeVertex(MetaBiome(VertexConfiguration([[3] * 6, [3, 4, 3, 4, 3]]), first_biome=TEST_4_6_12), [0, 0], 0, (0, 0), 1)
     first_biome_v.generate(depth=1)
     first_biome = first_biome_v.getFriends()[0]
     first_biome.generateEdges()
@@ -92,6 +92,7 @@ def draw():
     stroke(0)
     fill(0)
     text("TileFighter Version " + VERSION, 50, 50, 64)
+    text("Biome: " + str(BiomeFace.getPolytopeOn(BIOME_POLYTOPE, [mouseX, mouseY]).getAsBiome()), 50, 70, 64)
         
     # Garbage collection; delete finished animations
     TileBound.all_objects = {obj for obj in TileBound.all_objects if not (isinstance(obj, Animation) and not obj._is_moving)}
