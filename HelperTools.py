@@ -19,12 +19,16 @@ class cacher:
     Python 3.8 has similar function in standard library...
     but this is 2.7 :/
     """
-    def __init__(self):
+    def __init__(self, ignore_kwargs = False):
         self._dict = dict({})
+        self._ignore_kwargs = ignore_kwargs
         
     def __call__(self, func):
         def cached_func(s, *args, **kwargs):
-            index = (str(s), args, tuple(kwargs.items()))
+            if self._ignore_kwargs:
+                index = (str(s), args)
+            else:
+                index = (str(s), args, tuple(kwargs.items()))
             if index not in self._dict:
                 # Note that in Python 2, .items() returns list of tuples
                 # This is not true in Python 3

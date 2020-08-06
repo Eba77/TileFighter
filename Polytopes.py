@@ -174,7 +174,7 @@ class Duals(Polytope):
             return None
         close_topes = sorted(relevants, key=lambda t: square_dist(pos, t.getPosition()))
         for tope in close_topes:
-            if evenOddRule(tope.getPosition(), [dual_tope.getPosition() for dual_tope in tope.getMonotonic(tope._friends)]):
+            if evenOddRule(pos, [dual_tope.getPosition() for dual_tope in tope.getMonotonic(tope._friends)]):
                 return tope
         return None
     
@@ -293,6 +293,7 @@ class Duals(Polytope):
         The angle made by these lines is the turning angle
         The `edge` specifies which pair of friends to get
         """
+        assert False, "I'm pretty sure this is deprecated, _vertices/_faces are hella outdated"
         friend1, friend2 = edge._vertices if isinstance(self, Face) else edge._faces
         pos1 = friend1.getPosition()
         pos2 = friend2.getPosition()
@@ -409,8 +410,6 @@ class Vertex(Duals):
             # because it is affected by both current tile, and previous tile!
             # (technically this is the 'second' part, since loop is cyclical)
             prev_angle = angle # used for friend vertex calculation
-            #delta_ang, radius, side_length = self._biome.getVertexAngleAndRadiusAndSideLength(self._state[0], idx)
-            #delta_ang *= self._spin / 2.0
             delta_ang = self._spin * self._biome.getVertexAngle(self._state[0], idx) / 2
             angle += delta_ang
             radius = self._biome.getRadius(self._state[0], idx)
@@ -481,7 +480,7 @@ class Vertex(Duals):
         pushMatrix()
         translate(self._position[0], self._position[1])
         stroke(0)
-        fill(255)#self._heading / TWO_PI * 255)
+        fill(255)
         circle(0, 0, 20)
         fill(0, 0, 200)
         text(str(self._state), -6, 6, 16)
