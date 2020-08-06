@@ -7,6 +7,13 @@ And also all numpy methods I would want but cannot use due to Java base
 
 import itertools
 
+class cacher:
+    """
+    For efficiency, we want to cache certain function calls
+    so that they don't need to be recomputed every time!
+    """
+    pass # TODO: this
+
 # Note that Python Processing is built on Jython
 # and thus we can't use certain libraries, like
 # crucially *numpy*!

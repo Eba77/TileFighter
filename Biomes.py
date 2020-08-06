@@ -73,6 +73,21 @@ class Biome:
         """
         return PI - self.getTurningAngle(v, e)
     
+    def getVertexAngleAndRadiusAndSideLength(self, v, e):
+        """
+        An efficient way to calculate all three of these variables at once
+        Required because Processing Python Mode is quite slow...
+        """
+        turn_ang = self.getTurningAngle(v, e)
+        vert_ang = PI - turn_ang
+        side_length = 2 * self._base_radius[v] * sin(self.getTurningAngle(v, 0) / 2)
+        radius = side_length / (2 * sin(turn_ang / 2))
+        # For testing purposes
+        assert vert_ang == self.getVertexAngle(v, e), "Vertex Angle Fail"
+        assert radius == self.getRadius(v, e), "Radius Fail"
+        assert side_length == self.getSideLength(v, e), "Side Length Fail"
+        return (vert_ang, radius, side_length)
+    
     def swap(self, v, e):
         return self._vertex_configuration.swap(v, e)
     
