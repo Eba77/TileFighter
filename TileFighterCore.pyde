@@ -24,7 +24,12 @@ def setup():
     global current_tile, player
     fullScreen()
     frameRate(60)
-    first_vertex = TileVertex(TEST_4_6_12(), [0, 0], 0, (0, 0), 1)
+    first_biome_v = BiomeVertex(MetaBiome(VertexConfiguration([[3] * 6, [3, 4, 3, 4, 3]])), [0, 0], 0, (0, 0), 1)
+    first_biome_v.generate(depth=1)
+    first_biome = first_biome_v.getFriends()[0]
+    first_biome.generateEdges()
+    current_biome = BiomeFace.getPolytopeOn(BIOME_POLYTOPE, [0, 0]).getBiome()
+    first_vertex = TileVertex(HEX_FOREST(), [0, 0], 0, (0, 0), 1)
     first_vertex.generate(depth=1)
     current_tile = first_vertex.getFriends()[0]
     current_tile.generateEdges()

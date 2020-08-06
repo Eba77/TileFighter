@@ -416,7 +416,7 @@ class Vertex(Duals):
                         (self._state[0], idx),
                     )
                 tile.addFriend(self)
-                self.addFriend(raw_idx, tile) #self._friends[raw_idx] = tile
+                self.addFriend(raw_idx, tile)
             else:
                 val.addFriend(self)
             if raw_idx > 0:
@@ -440,10 +440,9 @@ class Vertex(Duals):
                     vert = self.getSual()(self._biome, new_pos, new_heading, self._biome.swap(self._state[0], idx), -self._spin)
                 self.addAdjacent(raw_idx, vert)
                 self._friends[raw_idx].addFriend(vert)
-                
             # Second (technically 'first') part of turning angle increment
             angle += self._spin * self._biome.getVertexAngle(self._state[0], idx) / 2
-           
+    
         # Match up beginning with end
         self._friends[0].addAdjacent(self._friends[-1])
         self._friends[-1].addAdjacent(self._friends[0])
@@ -457,7 +456,6 @@ class Vertex(Duals):
             vert = self.getSual()(self._biome, new_pos, new_heading, self._biome.swap(*self._state), -self._spin)
         self.addAdjacent(0, vert)
         self._friends[0].addFriend(vert)
-        
         # Recursive generation!
         if depth > 1:
             for vert in self._adjacents:
@@ -614,12 +612,21 @@ class BiomeEdge(Edge):
     def __init__(self, biome, v1, v2):
         Edge.__init__(self, biome, v1, v2)
         
+    def getBiome(self):
+        self.getAttributes().getAsBiome()
+        
 @definePolytope(BIOME_POLYTOPE)
 class BiomeVertex(Vertex):
     def __init__(self, biome, position, heading_, state, spin):
         Vertex.__init__(self, biome, position, heading_, state, spin)
         
+    def getBiome(self):
+        self.getAttributes().getAsBiome()
+        
 @definePolytope(BIOME_POLYTOPE)
 class BiomeFace(Face):
     def __init__(self, biome, position, heading_, state):
         Face.__init__(self, biome, position, heading_, state)
+        
+    def getBiome(self):
+        self.getAttributes().getAsBiome()
