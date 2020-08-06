@@ -178,6 +178,7 @@ class Duals(Polytope):
                 return tope
         return None
     
+    @cacher()
     def getDual(self):
         """
         Maps Vertices with Faces and vice verse
@@ -194,7 +195,8 @@ class Duals(Polytope):
             return BiomeVertex
         else:
             raise NotImplementedError
-            
+          
+    @cacher()  
     def getSual(self):
         """
         Opposite of Dual, AKA the class
@@ -212,7 +214,8 @@ class Duals(Polytope):
             return BiomeFace
         else:
             raise NotImplementedError
-            
+         
+    @cacher()
     def getEdgeType(self):
         """
         Either TileEdge or BiomeEdge
@@ -298,13 +301,15 @@ class Duals(Polytope):
             pos1[0] - pos2[0]
         ))
     
+    @cacher()
     def getApothem(self, edge):
         """
         Similar to radius, heads to center of edge rather than center of dual
         """
         edge_center = edge.getPosition()
         return sqrt(square_dist(edge_center, self.getPosition()))
-        
+       
+    @cacher() 
     def getAverageApothem(self):
         """
         Calls getApothem over all edges
@@ -312,6 +317,7 @@ class Duals(Polytope):
         avg = lambda x: sum(x, 0) / len(x)
         return avg([self.getApothem(x) for x in self._edges])
     
+    @cacher()
     def getRadius(self, edge):
         """
         Average of distances to left and right verts
@@ -323,6 +329,7 @@ class Duals(Polytope):
         d2 = sqrt(square_dist(p2, self.getPosition()))
         return (d1 + d2) / 2
         
+    @cacher()
     def getAverageRadius(self):
         if self.missingEdges():
             # This is the case when a tile isn't fully generated yet
@@ -331,6 +338,7 @@ class Duals(Polytope):
         avg = lambda x: sum(x, 0) / len(x)
         return avg([self.getRadius(x) for x in self._edges])
         
+    @cacher()
     def getSides(self):
         if isinstance(self, Vertex):
             amount = self._biome.getTileNumAtVertex(self._state[0])
@@ -360,6 +368,7 @@ class Vertex(Duals):
         
         self.addAsPolytope()
         
+    @cacher()
     def getSides(self):
         return len(self._biome.getConfig()[self._state[0]])
     
@@ -500,6 +509,7 @@ class Face(Duals):
         
         self.addAsPolytope()
         
+    @cacher()
     def getSides(self):
         return self._biome.getSides(*(self._state))
     
