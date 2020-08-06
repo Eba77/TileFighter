@@ -398,6 +398,7 @@ class Vertex(Duals):
             if not self.notCompletelyGenerated():
                 self._attributes = self._biome.getTileAttributes(self.getSides(), self._adjacents)
         
+    @cacher()
     def generate(self, depth):
         angle = self._heading
         for raw_idx, val in enumerate(self._friends):

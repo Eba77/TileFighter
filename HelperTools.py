@@ -23,10 +23,13 @@ class cacher:
         self._dict = dict({})
         
     def __call__(self, func):
-        def cached_func(s, *args):
-            if args not in self._dict:
-                self._dict[str(s), args] = func(s, *args)
-            return self._dict[str(s), args]
+        def cached_func(s, *args, **kwargs):
+            index = (str(s), args, tuple(kwargs.items()))
+            if index not in self._dict:
+                # Note that in Python 2, .items() returns list of tuples
+                # This is not true in Python 3
+                self._dict[index] = func(s, *args, **kwargs)
+            return self._dict[index]
         return cached_func
 
 # Note that Python Processing is built on Jython
