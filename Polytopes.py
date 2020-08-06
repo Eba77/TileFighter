@@ -628,5 +628,5 @@ class BiomeFace(Face):
     def __init__(self, biome, position, heading_, state):
         Face.__init__(self, biome, position, heading_, state)
         
-    def getBiome(self):
-        self.getAttributes().getAsBiome()
+    def getAsBiome(self):
+        return self._attributes.getAsBiome()

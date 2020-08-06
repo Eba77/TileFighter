@@ -111,8 +111,7 @@ class MetaBiome(Biome):
             def __init__(self):
                 MetaTile.__init__(self, biome)
                 
-            @classmethod
-            def getAsBiome(c):
+            def getAsBiome(self):
                 return biome
         return _
     
@@ -130,7 +129,8 @@ class MetaBiome(Biome):
         """
         options = [x for x in MetaBiome.options if x not in adjacents]
         assert len(options) > 0, "All outta options..."
-        return rnd.choice(options)
+        to_return = rnd.choice(options)()
+        return to_return
     
 @generateable
 class HEX_FOREST(Biome):
