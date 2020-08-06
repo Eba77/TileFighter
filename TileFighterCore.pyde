@@ -36,7 +36,6 @@ def setup():
     player = Player(current_tile._position)
     print "Vertices on initial gen: ", len(Polytope.all_polytopes[TILE_POLYTOPE, TileVertex])
     print "Tiles on initial gen: ", len(Polytope.all_polytopes[TILE_POLYTOPE, TileFace])
-    print [x.getAsBiome() for x in first_biome._adjacents]
 
 def posOnScreen(pos, leniency):
     """

@@ -19,7 +19,7 @@ class Biome:
         self._biome_id = Biome.cur_id
         self._vertex_configuration = v_conf
         self._name = n
-        self._base_radius = [100] * len(v_conf)
+        self._base_radius = [TILE_SIZE] * len(v_conf)
         Biome.cur_id += 1
   
     def getSides(self, v, e):
@@ -121,7 +121,7 @@ class MetaBiome(Biome):
         If first_biome is not None, will be that biome
         """
         Biome.__init__(self, v_conf, "MetaBiome")
-        self._base_radius = [1000] * len(self._vertex_configuration)
+        self._base_radius = [BIOME_SIZE] * len(self._vertex_configuration)
         self._first_biome = first_biome
         self._has_generated_any_biome = False
         
