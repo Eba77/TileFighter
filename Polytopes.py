@@ -116,8 +116,8 @@ class Edge(Polytope):
         have in common.
         """
         v1, v2 = self._vertices
-        v1.generate(depth=2)
-        v2.generate(depth=2)
+        v1.generate(depth=1)
+        v2.generate(depth=1)
         options = [face for face in v1._friends if face in v2._friends]
         assert len(options) == 2, "Somethin' funky goin' on with them there faces..."
         self._faces = (options[0], options[1])
