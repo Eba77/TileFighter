@@ -24,13 +24,13 @@ def setup():
     global current_tile, player
     fullScreen()
     frameRate(60)
-    first_vertex = Vertex(TEST_4_6_12(), [0, 0], 0, (0, 0), 1)
+    first_vertex = TileVertex(TEST_4_6_12(), [0, 0], 0, (0, 0), 1)
     first_vertex.generate(depth=1)
     current_tile = first_vertex.getFriends()[0]
     current_tile.generateEdges()
     player = Player(current_tile._position)
-    print "Vertices on initial gen: ", len(Polytope.all_polytopes[Vertex])
-    print "Tiles on initial gen: ", len(Polytope.all_polytopes[Face])
+    print "Vertices on initial gen: ", len(Polytope.all_polytopes[TILE_POLYTOPE, TileVertex])
+    print "Tiles on initial gen: ", len(Polytope.all_polytopes[TILE_POLYTOPE, TileFace])
 
 def posOnScreen(pos, leniency):
     """
@@ -52,7 +52,7 @@ def draw():
     translate(width / 2 - player.getPosition()[0], height / 2 - player.getPosition()[1])
     background(150)
     partialGens = set({})
-    for tile in Polytope.all_polytopes[Face]:
+    for tile in Polytope.all_polytopes[TILE_POLYTOPE, TileFace]:
         if posOnScreen(tile.getPosition(), tile.getAverageRadius()):
             tile.drawTile(depth=1)
             if tile.notCompletelyGenerated() or tile.missingEdges():
@@ -63,17 +63,17 @@ def draw():
         tile.drawTile(depth=1)
         
     # Highlight tile that the cursor is on
-    tile_pointing_at = Face.getPolytopeOn(getMouse())
+    tile_pointing_at = TileFace.getPolytopeOn(TILE_POLYTOPE, getMouse())
     if tile_pointing_at is not None:
         tile_pointing_at.highlight()
         
     if DRAW_EDGES:
-        for edge in Polytope.all_polytopes[Edge]:
+        for edge in Polytope.all_polytopes[TILE_POLYTOPE, TileEdge]:
             if posOnScreen(edge.getPosition(), 40):
                 edge.drawEdge()
         
     if DRAW_VERTICES:
-        for vert in Polytope.all_polytopes[Vertex]:
+        for vert in Polytope.all_polytopes[TILE_POLYTOPE, TileVertex]:
             if posOnScreen(vert.getPosition(), 40):
                 vert.drawVertex()
         
@@ -99,7 +99,7 @@ def mousePressed():
     Move player
     TODO: If tile not empty, attack denizen with stab attack!
     """
-    player.move(Face.getPolytopeOn(getMouse()))
+    player.move(TileFace.getPolytopeOn(TILE_POLYTOPE, getMouse()))
     
 def keyPressed():
     """
@@ -107,8 +107,8 @@ def keyPressed():
     called `key` which stores the most recent key pressed!
     """
     if key == ESC:
-        print "Vertices explored: ", len(Polytope.all_polytopes[Vertex])
-        print "Tiles explored: ", len(Polytope.all_polytopes[Face])
+        print "Vertices explored: ", len(Polytope.all_polytopes[TILE_POLYTOPE, TileVertex])
+        print "Tiles explored: ", len(Polytope.all_polytopes[TILE_POLYTOPE, TileFace])
         exit()
     if key == 'z' or key == 'Z':
         player.swipe()

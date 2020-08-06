@@ -12,40 +12,66 @@ from HelperTools import *
 from MagicNumbers import *
 import math
 
-def definePolytope(poly):
+"""
+Constants defining what type of polytopes there are
+"""
+class BIOME_POLYTOPE:
+    pass    
+class TILE_POLYTOPE:
+    pass
+
+def definePolytope(style):
     """
     Initializes a polytope, should be used as a decorator
     above the end-level polytope classes
+    Takes an argument `style`, about whether the polytope
+    is a tile polytope or a biome polytope
     """
-    Polytope.all_polytopes[poly] = set({})
-    return poly
+    def toReturn(poly):
+        Polytope.all_polytopes[(style, poly)] = set({})
+        poly.getStyle = lambda self: (style, poly) # add a function to get the style from a poly
+        return poly
+    
+    return toReturn
 
 class Polytope:
     all_polytopes = dict({})
     
     @classmethod
-    def getPolytopesNear(cls, pos, epsilon):
+    def getPolytopesNear(cls, style, pos, epsilon):
         """
         Note that this can be called as Vertex.getPolytopesNear(...),
         and that is the method to get all examples of a specific polytope!
         """
-        return {p for p in Polytope.all_polytopes[cls] if square_dist(pos, p.getPosition()) < epsilon**2}
+        return {p for p in Polytope.all_polytopes[style, cls] if square_dist(pos, p.getPosition()) < epsilon**2}
     
     @classmethod
-    def getNearestPolytopeWithin(cls, pos, epsilon):
+    def getNearestPolytopeWithin(cls, style, pos, epsilon):
         """
         Returns None if no polytope within epsilon
         """
-        if len(Polytope.all_polytopes[cls]) == 0:
+        if len(Polytope.all_polytopes[(style, cls)]) == 0:
             return None
-        to_return = min(Polytope.all_polytopes[cls], key=lambda v: square_dist(pos, v.getPosition()))
+        to_return = min(Polytope.all_polytopes[style, cls], key=lambda v: square_dist(pos, v.getPosition()))
         if square_dist(pos, to_return.getPosition()) < epsilon**2:
             return to_return
         return None
     
     @classmethod
-    def getPolytopeOn(cls, pos):
+    def getPolytopeOn(cls, style, pos):
         raise NotImplementedError
+        
+    def addAsPolytope(self):
+        """
+        Adds polytope to list of polytopes
+        """
+        Polytope.all_polytopes[self.getStyle()].add(self)
+        
+    def getLikePolytopes(self):
+        """
+        Gets all polytopes like this one
+        """
+        return all_polytopes[self.getStyle()]
     
     def __init__(self, biome, position):
         self._biome = biome
@@ -65,7 +91,6 @@ class Polytope:
         if self._attributes.isDestructible():
             self._attributes = self._attributes.destroy()
     
-@definePolytope
 class Edge(Polytope):
     """
     Edges are initially defined as pairs of Vertices
@@ -80,7 +105,7 @@ class Edge(Polytope):
         self._vertices = (v1, v2)
         self._faces = None
         
-        Polytope.all_polytopes[Edge].add(self)
+        self.addAsPolytope()
         
     def notCompletelyGenerated(self):
         return self._faces is None
@@ -132,7 +157,6 @@ class Edge(Polytope):
         """
         assert d1._edges is not None and d2._edges is not None, "Need edges to exist!"
         return [edge for edge in d1._edges if edge in d2._edges]
-        
     
 class Duals(Polytope):
     """
@@ -140,12 +164,12 @@ class Duals(Polytope):
     """
     
     @classmethod
-    def getPolytopeOn(cls, pos):
+    def getPolytopeOn(cls, style, pos):
         """
         Gets the polytope that the position pos is on
         Returns None if not on a tile
         """
-        relevants = Polytope.all_polytopes[cls]
+        relevants = Polytope.all_polytopes[style, cls]
         if len(relevants) == 0:
             return None
         close_topes = sorted(relevants, key=lambda t: square_dist(pos, t.getPosition()))
@@ -155,12 +179,48 @@ class Duals(Polytope):
         return None
     
     def getDual(self):
-        if isinstance(self, Vertex):
-            return Face
-        elif isinstance(self, Face):
-            return Vertex
+        """
+        Maps Vertices with Faces and vice verse
+        Would be good if there were a more automatic
+        way to do this...
+        """
+        if isinstance(self, TileVertex):
+            return TileFace
+        elif isinstance(self, TileFace):
+            return TileVertex
+        elif isinstance(self, BiomeVertex):
+            return BiomeFace
+        elif isinstance(self, BiomeFace):
+            return BiomeVertex
         else:
             raise NotImplementedError
+            
+    def getSual(self):
+        """
+        Opposite of Dual, AKA the class
+        Wanted to do this as simply:
+            return type(self)
+        but that didn't seem to work
+        """
+        if isinstance(self, TileVertex):
+            return TileVertex
+        elif isinstance(self, TileFace):
+            return TileFace
+        elif isinstance(self, BiomeVertex):
+            return BiomeVertex
+        elif isinstance(self, BiomeFace):
+            return BiomeFace
+        else:
+            raise NotImplementedError
+            
+    def getEdgeType(self):
+        """
+        Either TileEdge or BiomeEdge
+        """
+        if isinstance(self, TileVertex) or isinstance(self, TileFace):
+            return TileEdge
+        elif isinstance(self, BiomeVertex) or isinstance(self, BiomeFace):
+            return BiomeEdge
             
     def getSides(self):
         raise NotImplementedError
@@ -237,7 +297,6 @@ class Duals(Polytope):
             pos1[1] - pos2[1],
             pos1[0] - pos2[0]
         ))
-        #return self._biome.getTurningAngle(*self._position_in_vertex)
     
     def getApothem(self, edge):
         """
@@ -281,7 +340,6 @@ class Duals(Polytope):
     def missingEdges(self):
         return len(self._edges) < self._goal_friends
     
-@definePolytope
 class Vertex(Duals):
     """
     Vertices are the primary generator of our tilings.
@@ -300,7 +358,7 @@ class Vertex(Duals):
         self._adjacents = [None for x in range(self._goal_friends)]
         self._edges = []
         
-        Polytope.all_polytopes[Vertex].add(self)
+        self.addAsPolytope()
         
     def getSides(self):
         return len(self._biome.getConfig()[self._state[0]])
@@ -315,7 +373,7 @@ class Vertex(Duals):
         if not self.isAdjacent(adj):
             # If this is the first time they've been connected,
             # create an edge for the both of them!
-            e = Edge(self._biome, self, adj)
+            e = self.getEdgeType()(self._biome, self, adj)
             self._edges.append(e)
             adj._edges.append(e)
         self._adjacents[idx] = adj
@@ -349,9 +407,9 @@ class Vertex(Duals):
                     cos(angle) * radius + self._position[0],
                     sin(angle) * radius + self._position[1]
                 ]
-                tile = Face.getNearestPolytopeWithin(new_pos, CLOSENESS_CONSTANT)
+                tile = self.getDual().getNearestPolytopeWithin(self.getStyle()[0], new_pos, CLOSENESS_CONSTANT)
                 if tile is None:
-                    tile = Face(
+                    tile = self.getDual()(
                         self._biome,
                         new_pos,
                         angle,
@@ -371,7 +429,7 @@ class Vertex(Duals):
                     cos(prev_angle) * side_length + self._position[0],
                     sin(prev_angle) * side_length + self._position[1]
                 ]
-                vert = Vertex.getNearestPolytopeWithin(new_pos, CLOSENESS_CONSTANT)
+                vert = self.getSual().getNearestPolytopeWithin(self.getStyle()[0], new_pos, CLOSENESS_CONSTANT)
                 if vert is None:
                     """
                     Calculating the heading requires drawing out a diagram to figure out,
@@ -379,7 +437,7 @@ class Vertex(Duals):
                     but it's hard to explain englishically)
                     """
                     new_heading = PI + prev_angle
-                    vert = Vertex(self._biome, new_pos, new_heading, self._biome.swap(self._state[0], idx), -self._spin)
+                    vert = self.getSual()(self._biome, new_pos, new_heading, self._biome.swap(self._state[0], idx), -self._spin)
                 self.addAdjacent(raw_idx, vert)
                 self._friends[raw_idx].addFriend(vert)
                 
@@ -393,10 +451,10 @@ class Vertex(Duals):
             cos(angle) * side_length + self._position[0],
             sin(angle) * side_length + self._position[1]
         ]
-        vert = Vertex.getNearestPolytopeWithin(new_pos, CLOSENESS_CONSTANT)
+        vert = self.getSual().getNearestPolytopeWithin(self.getStyle()[0], new_pos, CLOSENESS_CONSTANT)
         if vert is None:
             new_heading = PI + angle
-            vert = Vertex(self._biome, new_pos, new_heading, self._biome.swap(*self._state), -self._spin)
+            vert = self.getSual()(self._biome, new_pos, new_heading, self._biome.swap(*self._state), -self._spin)
         self.addAdjacent(0, vert)
         self._friends[0].addFriend(vert)
         
@@ -422,7 +480,6 @@ class Vertex(Duals):
         line(0, 0, 30 * cos(self._heading), 30 * sin(self._heading))
         popMatrix()
         
-@definePolytope
 class Face(Duals):
     """
     Faces are the dual of Vertices
@@ -440,7 +497,7 @@ class Face(Duals):
         self._edges = set({})
         self._goal_friends = self.getSides()
         
-        Polytope.all_polytopes[Face].add(self)
+        self.addAsPolytope()
         
     def getSides(self):
         return self._biome.getSides(*(self._state))
@@ -536,3 +593,33 @@ class Face(Duals):
             for adj in self._adjacents:
                 if adj is not None:
                     adj.drawTile(depth - 1)
+                    
+@definePolytope(TILE_POLYTOPE)
+class TileEdge(Edge):
+    def __init__(self, biome, v1, v2):
+        Edge.__init__(self, biome, v1, v2)
+        
+@definePolytope(TILE_POLYTOPE)
+class TileVertex(Vertex):
+    def __init__(self, biome, position, heading_, state, spin):
+        Vertex.__init__(self, biome, position, heading_, state, spin)
+        
+@definePolytope(TILE_POLYTOPE)
+class TileFace(Face):
+    def __init__(self, biome, position, heading_, state):
+        Face.__init__(self, biome, position, heading_, state)
+        
+@definePolytope(BIOME_POLYTOPE)
+class BiomeEdge(Edge):
+    def __init__(self, biome, v1, v2):
+        Edge.__init__(self, biome, v1, v2)
+        
+@definePolytope(BIOME_POLYTOPE)
+class BiomeVertex(Vertex):
+    def __init__(self, biome, position, heading_, state, spin):
+        Vertex.__init__(self, biome, position, heading_, state, spin)
+        
+@definePolytope(BIOME_POLYTOPE)
+class BiomeFace(Face):
+    def __init__(self, biome, position, heading_, state):
+        Face.__init__(self, biome, position, heading_, state)
