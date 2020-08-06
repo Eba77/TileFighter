@@ -28,7 +28,7 @@ def setup():
     first_biome_v.generate(depth=1)
     first_biome = first_biome_v.getFriends()[0]
     first_biome.generateEdges()
-    current_biome = BiomeFace.getPolytopeOn(BIOME_POLYTOPE, [0, 0]).getAsBiome()
+    current_biome = BiomeVertex.getPolytopeOn(BIOME_POLYTOPE, [0, 0]).getAsBiome()
     first_vertex = TileVertex(current_biome(), [0, 0], 0, (0, 0), 1)
     first_vertex.generate(depth=1)
     current_tile = first_vertex.getFriends()[0]
@@ -36,6 +36,7 @@ def setup():
     player = Player(current_tile._position)
     print "Vertices on initial gen: ", len(Polytope.all_polytopes[TILE_POLYTOPE, TileVertex])
     print "Tiles on initial gen: ", len(Polytope.all_polytopes[TILE_POLYTOPE, TileFace])
+    print [x.getAsBiome() for x in first_biome._adjacents]
 
 def posOnScreen(pos, leniency):
     """
@@ -92,7 +93,8 @@ def draw():
     stroke(0)
     fill(0)
     text("TileFighter Version " + VERSION, 50, 50, 64)
-    text("Biome: " + str(BiomeFace.getPolytopeOn(BIOME_POLYTOPE, [mouseX, mouseY]).getAsBiome()), 50, 70, 64)
+    # Note that biomes exist using dual tilings
+    text("Biome: " + str(BiomeVertex.getPolytopeOn(BIOME_POLYTOPE, [mouseX, mouseY]).getAsBiome()), 50, 70, 64)
         
     # Garbage collection; delete finished animations
     TileBound.all_objects = {obj for obj in TileBound.all_objects if not (isinstance(obj, Animation) and not obj._is_moving)}

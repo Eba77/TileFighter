@@ -123,6 +123,7 @@ class MetaBiome(Biome):
         Biome.__init__(self, v_conf, "MetaBiome")
         self._base_radius = [1000] * len(self._vertex_configuration)
         self._first_biome = first_biome
+        self._has_generated_any_biome = False
         
     def getTileAttributes(self, sides, adjacents):
         """
@@ -131,7 +132,8 @@ class MetaBiome(Biome):
         """
         options = [x for x in MetaBiome.options if x not in adjacents]
         assert len(options) > 0, "All outta options..."
-        if self._first_biome is not None:
+        if not self._has_generated_any_biome and self._first_biome is not None:
+            self._has_generated_any_biome = True
             return MetaBiome.makeMeta(self._first_biome)()
         to_return = rnd.choice(options)()
         return to_return

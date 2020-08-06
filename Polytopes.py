@@ -612,16 +612,16 @@ class BiomeEdge(Edge):
     def __init__(self, biome, v1, v2):
         Edge.__init__(self, biome, v1, v2)
         
-    def getBiome(self):
-        self.getAttributes().getAsBiome()
+    def getAsBiome(self):
+        return self._attributes.getAsBiome()
         
 @definePolytope(BIOME_POLYTOPE)
 class BiomeVertex(Vertex):
     def __init__(self, biome, position, heading_, state, spin):
         Vertex.__init__(self, biome, position, heading_, state, spin)
         
-    def getBiome(self):
-        self.getAttributes().getAsBiome()
+    def getAsBiome(self):
+        return self._attributes.getAsBiome()
         
 @definePolytope(BIOME_POLYTOPE)
 class BiomeFace(Face):
