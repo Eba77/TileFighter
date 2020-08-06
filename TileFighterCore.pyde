@@ -93,7 +93,7 @@ def draw():
     fill(0)
     text("TileFighter Version " + VERSION, 50, 50, 64)
     # Note that biomes exist using dual tilings
-    text("Biome: " + str(BiomeVertex.getPolytopeOn(BIOME_POLYTOPE, [mouseX, mouseY]).getAsBiome()), 50, 70, 64)
+    text("Biome: " + str(BiomeVertex.getPolytopeOn(BIOME_POLYTOPE, getMouse()).getAsBiome()), 50, 70, 64)
         
     # Garbage collection; delete finished animations
     TileBound.all_objects = {obj for obj in TileBound.all_objects if not (isinstance(obj, Animation) and not obj._is_moving)}
