@@ -99,6 +99,7 @@ class Edge(Polytope):
     """
     
     def __init__(self, biome, v1, v2):
+        assert type(v1) == type(v2), "Error: Tried to draw edge between mismatched types!"
         p1 = v1.getPosition()
         p2 = v2.getPosition()
         Polytope.__init__(self, biome, [(p1[0] + p2[0]) / 2, (p1[1] + p2[1]) / 2])
@@ -278,8 +279,9 @@ class Duals(Polytope):
         """
         return len([x for x in self._friends if x is not None]) < self._goal_friends
             
+    @cacher()
     def isAdjacent(self, adj):
-        return adj in self._adjacents
+        return CACHE_IF(adj in self._adjacents or self in adj._adjacents, compare=True)
             
     def isFriend(self, friend):
         return friend in self._friends
@@ -330,21 +332,23 @@ class Duals(Polytope):
         d2 = sqrt(square_dist(p2, self.getPosition()))
         return (d1 + d2) / 2
         
-    @cacher() # Note that this will probably cache the pre-not-missing-edges value...
+    @cacher()
     def getAverageRadius(self):
         if self.missingEdges():
             # This is the case when a tile isn't fully generated yet
             # but still needs to give a radius to check if it is on screen
-            return self._biome._base_radius[0]
+            return DONT_CACHE(self._biome._base_radius[0])
         avg = lambda x: sum(x, 0) / len(x)
         return avg([self.getRadius(x) for x in self._edges])
     
-    @cacher() # Note that this will probably cache the pre-not-missing-edges value...
+    @cacher()
     def getMaxRadius(self):
+        print(self)
         if self.missingEdges():
             # This is the case when a tile isn't fully generated yet
             # but still needs to give a radius to check if it is on screen
-            return self._biome._base_radius[0]
+            return DONT_CACHE(self._biome._base_radius[0])
+        print("n")
         return max([self.getRadius(x) for x in self._edges])
         
     @cacher()
@@ -355,6 +359,7 @@ class Duals(Polytope):
             amount = self._biome.getConfig()[self._state[0]][self._state[1]]
             
     def missingEdges(self):
+        print len(self._edges) , self._goal_friends, self._edges
         return len(self._edges) < self._goal_friends
     
 class Vertex(Duals):

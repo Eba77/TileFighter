@@ -69,7 +69,7 @@ def draw():
         
     # Update the biome generation
     partialBiomes = set({})
-    for biome in Polytope.all_polytopes[BIOME_POLYTOPE, BiomeFace]:
+    for biome in Polytope.all_polytopes[BIOME_POLYTOPE, BiomeVertex]:
         if posOnScreen(biome.getPosition(), biome.getMaxRadius()):
             if biome.notCompletelyGenerated() or biome.missingEdges():
                 partialBiomes.add(biome)

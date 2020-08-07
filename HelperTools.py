@@ -32,9 +32,53 @@ class cacher:
             if index not in self._dict:
                 # Note that in Python 2, .items() returns list of tuples
                 # This is not true in Python 3
-                self._dict[index] = func(s, *args, **kwargs)
+                output = func(s, *args, **kwargs)
+                if isinstance(output, DONT_CACHE):
+                    # Don't cache the output!
+                    return output.getValue()
+                elif isinstance(output, CACHE_IF) and not output.shouldCache():
+                    return output.getValue()
+                else:
+                    self._dict[index] = output
             return self._dict[index]
         return cached_func
+    
+class cacheflags:
+    """
+    If the return value of a to-be-cached function is wrapped in one
+    of these, special handling will result.
+    
+    Note that if an output has already been cached, these won't do anything,
+    the function will always return what was already cached
+    """
+    def __init__(self, val):
+        self._val = val
+            
+    def getValue(self):
+        return self._val
+    
+class DONT_CACHE(cacheflags):
+    """
+    Wrap output values in this to prevent them being cached
+    """
+    def __init__(self, val):
+        cacheflags.__init__(self, val)
+        
+class CACHE_IF(cacheflags):
+    """
+    Only cache once the output equals some `compare` value
+    or satisfies some `function`
+    """
+    def __init__(self, val, compare=None, function=None):
+        assert compare or function, "Has to be in either compare mode, or function mode!"
+        cacheflags.__init__(self, val)
+        if compare is not None:
+            self._should_cache = val == compare
+        else:
+            self._shoulld_cache = function(val)
+
+    def shouldCache(self):
+        return self._should_cache
 
 # Note that Python Processing is built on Jython
 # and thus we can't use certain libraries, like
