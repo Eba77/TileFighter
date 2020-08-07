@@ -126,14 +126,12 @@ class Edge(Polytope):
         options[1]._edges.add(self)
         
     def drawEdge(self):
-        pushMatrix() # I don't actually use these matrices!
         strokeWeight(5)
         v1, v2 = self._vertices
         a, b = v1.getPosition()
         c, d = v2.getPosition()
         line(a, b, c, d)
         strokeWeight(1)
-        popMatrix()
         
     @classmethod
     def inCommon(cls, d1, d2):
@@ -265,7 +263,6 @@ class Duals(Polytope):
                 friend.getPosition()[0] - self._position[0]
             )
         )
-        return to_return
         
     def getAdjacents(self):
         return self._adjacents
@@ -279,9 +276,8 @@ class Duals(Polytope):
         """
         return len([x for x in self._friends if x is not None]) < self._goal_friends
             
-    @cacher()
     def isAdjacent(self, adj):
-        return CACHE_IF(adj in self._adjacents or self in adj._adjacents, compare=True)
+        return adj in self._adjacents or self in adj._adjacents
             
     def isFriend(self, friend):
         return friend in self._friends
@@ -379,7 +375,6 @@ class Vertex(Duals):
         
         self.addAsPolytope()
         
-    @cacher()
     def getSides(self):
         return len(self._biome.getConfig()[self._state[0]])
     
@@ -485,20 +480,29 @@ class Vertex(Duals):
                 
     def drawVertex(self):
         """
-        Really should only be used for debugging!
+        Draws vertices
+        
+        Because Processing Python Mode is really slow, can't use matrices
+        to shift the position.
         """
-        pushMatrix()
-        translate(self._position[0], self._position[1])
+        
         stroke(0)
         fill(255)
-        circle(0, 0, 20)
-        fill(0, 0, 200)
-        text(str(self._state), -6, 6, 16)
+        circle(self._position[0], self._position[1], 20)
         
-        # Draw line pointing in direction of `heading`
-        stroke(0, 255, 0)
-        line(0, 0, 30 * cos(self._heading), 30 * sin(self._heading))
-        popMatrix()
+        if DEBUG_VERTICES:
+            # Debug info
+            fill(0, 0, 200)
+            text(str(self._state), -6 + self._position[0], 6 + self._position[1], 16)
+        
+            # Draw line pointing in direction of `heading` (debug)
+            stroke(0, 255, 0)
+            line(
+                self._position[0],
+                self._position[1],
+                30 * cos(self._heading) + self._position[0],
+                30 * sin(self._heading) + self._position[1]
+            )
         
 class Face(Duals):
     """
@@ -518,6 +522,8 @@ class Face(Duals):
         self._goal_friends = self.getSides()
         
         self.addAsPolytope()
+        
+        self._cached_shape = None
         
     @cacher()
     def getSides(self):
@@ -568,11 +574,15 @@ class Face(Duals):
     
     def highlight(self):
         if self.getAttributes().isPassable():
-            self.drawTile(0, color(255, 255, 0, 100))
+            self.drawTile(color(255, 255, 0, 100))
         else:
-            self.drawTile(0, color(255, 0, 0, 100))
+            self.drawTile(color(255, 0, 0, 100))
+          
+    @cacher()
+    def monotonicFriends(self):
+        return CACHE_IF(self.getMonotonic(self._friends), bool=len(self._friends) == self._goal_friends)
             
-    def drawTile(self, depth, highlight = None):
+    def drawTile(self, highlight = None):
         """
         Draws this tile, and all times within `depth`
         Note that this method is inefficient and will result
@@ -585,11 +595,8 @@ class Face(Duals):
         irregularPolygon(
             [0, 0],
             [
-                [
-                    x.getPosition()[0],
-                    x.getPosition()[1]
-                ]
-                for x in self.getMonotonic(self._friends)
+                x.getPosition()
+                for x in self.monotonicFriends()
             ],
             self._attributes.getColor(),
             self._attributes.getStroke()
@@ -602,15 +609,11 @@ class Face(Duals):
                         (x.getPosition()[0] + self._position[0]) * 0.5,
                         (x.getPosition()[1] + self._position[1]) * 0.5
                     ]
-                    for x in self.getMonotonic(self._friends)
+                    for x in self.monotonicFriends()
                 ],
                 highlight,
                 self._attributes.getStroke()
             )
-        if depth > 1:
-            for adj in self._adjacents:
-                if adj is not None:
-                    adj.drawTile(depth - 1)
                     
 @definePolytope(TILE_POLYTOPE)
 class TileEdge(Edge):

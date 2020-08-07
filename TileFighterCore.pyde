@@ -22,7 +22,7 @@ player = None
 
 def setup():
     global current_tile, player
-    fullScreen()
+    fullScreen(P2D)
     frameRate(DESIRED_FRAME_RATE)
     first_biome_v = BiomeVertex(MetaBiome(VertexConfiguration([[3] * 6, [3, 4, 3, 4, 3]]), first_biome=TEST_4_6_12), [0, 0], 0, (0, 0), 1)
     first_biome_v.generate(depth=1)
@@ -68,13 +68,14 @@ def draw():
     partialGens = set({})
     for tile in Polytope.all_polytopes[TILE_POLYTOPE, TileFace]:
         if posOnScreen(tile.getPosition(), 300):
-            tile.drawTile(depth=1)
+            if DRAW_FACES:
+                tile.drawTile()
             if tile.notCompletelyGenerated() or tile.missingEdges():
                 partialGens.add(tile)
     for tile in partialGens:
         # Any tile that is onscreen needs to be fully generated!
         tile.fullyGenerate()
-        tile.drawTile(depth=1)
+        tile.drawTile()
         
     # Update the biome generation
     partialBiomes = set({})
@@ -89,7 +90,8 @@ def draw():
     # Highlight tile that the cursor is on
     tile_pointing_at = TileFace.getPolytopeOn(TILE_POLYTOPE, getMouse())
     if tile_pointing_at is not None:
-        tile_pointing_at.highlight()
+        if DRAW_FACES:
+            tile_pointing_at.highlight()
         
     if DRAW_EDGES:
         for edge in Polytope.all_polytopes[TILE_POLYTOPE, TileEdge]:

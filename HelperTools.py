@@ -40,8 +40,10 @@ class cacher:
                 if isinstance(output, DONT_CACHE):
                     # Don't cache the output!
                     return output.getValue()
-                elif isinstance(output, CACHE_IF) and not output.shouldCache():
-                    return output.getValue()
+                elif isinstance(output, CACHE_IF):
+                    if not output.shouldCache():
+                        return output.getValue()
+                    self._dict[index] = output.getValue()
                 else:
                     self._dict[index] = output
             return self._dict[index]
@@ -73,13 +75,15 @@ class CACHE_IF(cacheflags):
     Only cache once the output equals some `compare` value
     or satisfies some `function`
     """
-    def __init__(self, val, compare=None, function=None):
-        assert compare or function, "Has to be in either compare mode, or function mode!"
+    def __init__(self, val, compare=None, function=None, bool=None):
+        assert compare is not None or function is not None or bool is not None, "Has to be in either compare mode, or function mode, or bool mode!"
         cacheflags.__init__(self, val)
         if compare is not None:
             self._should_cache = val == compare
+        elif function is not None:
+            self._should_cache = function(val)
         else:
-            self._shoulld_cache = function(val)
+            self._should_cache = bool
 
     def shouldCache(self):
         return self._should_cache
@@ -149,6 +153,26 @@ def regularPolygon(pos, radius, npoints, draw_angle, in_fill = None, in_stroke =
 Play in TEST_3_3_3_3_3_3_and_3_4_3_4_3, but don't have the npoints%2==1 bit and rotate by
 the negative draw angle.  Gives an interesting look!
 """
+
+def irregularPolygonShape(pos, points, in_fill = None, in_stroke = None):
+    """
+    Like `irregularPolygon`, but it returns it as a PShape rather than
+    drawing it, to make it cacheable
+    """
+    assert False, "This isn't working yet!"
+    pushMatrix()
+    translate(*pos)
+    poly = createShape()
+    poly.beginShape()
+    if in_fill is not None:
+        poly.setFill(in_fill)
+    if in_stroke is not None:
+        poly.setStroke(in_stroke)
+    for p in points:
+        poly.vertex(*p)
+    poly.endShape(CLOSE)
+    popMatrix()
+    return poly
     
     
 def irregularPolygon(pos, points, in_fill = None, in_stroke = None):
@@ -156,17 +180,14 @@ def irregularPolygon(pos, points, in_fill = None, in_stroke = None):
     Draws an irregular polygon with vertices at `points`
     Warning; doesn't work for nonconvex polygons
     """
-    pushMatrix()
-    translate(*pos)
     beginShape()
     if in_fill is not None:
         fill(in_fill)
     if in_stroke is not None:
         stroke(in_stroke)
     for p in points:
-        vertex(*p)
+        vertex(p[0] + pos[0], p[1] + pos[1])
     endShape(CLOSE)
-    popMatrix()
     
 def evenOddRule(pos, points):
     """

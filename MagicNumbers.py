@@ -6,6 +6,7 @@ All global constants are here
 
 DRAW_VERTICES = True
 DRAW_EDGES = True
+DRAW_FACES = True
 LENIENT = True # Some things that fail asserts or raise NotImplementedErrors will fail gracefully
 CLOSENESS_CONSTANT = 1 # how close two tiles have to be to be considered the same
 BIOME_SIZE = 1000 # Radius of Biome Tilings
@@ -13,4 +14,5 @@ BIOME_SIZE = 1000 # Radius of Biome Tilings
 # but it is linearly related)
 TILE_SIZE = 100 # Radius of Tile Tilings
 DESIRED_FRAME_RATE = 60
-VERSION = "0.3b[Alpha]"
+DEBUG_VERTICES = False # Whether or not to show debug info on vertices
+VERSION = "0.3b [Alpha]"
