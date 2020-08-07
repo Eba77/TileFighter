@@ -581,15 +581,13 @@ class Face(Duals):
         however this tile is adjacent to its adjacents, so it'll be drawn
         twice!)  Could be improved later
         """
-        pushMatrix()
-        translate(self._position[0], self._position[1])
         stroke(0)
         irregularPolygon(
             [0, 0],
             [
                 [
-                    x.getPosition()[0] - self._position[0],
-                    x.getPosition()[1] - self._position[1]
+                    x.getPosition()[0],
+                    x.getPosition()[1]
                 ]
                 for x in self.getMonotonic(self._friends)
             ],
@@ -601,15 +599,14 @@ class Face(Duals):
                 [0, 0],
                 [
                     [
-                        (x.getPosition()[0] - self._position[0]) * 0.5,
-                        (x.getPosition()[1] - self._position[1]) * 0.5
+                        (x.getPosition()[0] + self._position[0]) * 0.5,
+                        (x.getPosition()[1] + self._position[1]) * 0.5
                     ]
                     for x in self.getMonotonic(self._friends)
                 ],
                 highlight,
                 self._attributes.getStroke()
             )
-        popMatrix()
         if depth > 1:
             for adj in self._adjacents:
                 if adj is not None:
