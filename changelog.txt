@@ -1,3 +1,6 @@
+0.3c Alpha
+- Much faster by using FX2D renderer
+
 0.3b Alpha
 - Biome generation infite
 - Sped up a lot using caching; further work still required
