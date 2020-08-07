@@ -343,12 +343,10 @@ class Duals(Polytope):
     
     @cacher()
     def getMaxRadius(self):
-        print(self)
         if self.missingEdges():
             # This is the case when a tile isn't fully generated yet
             # but still needs to give a radius to check if it is on screen
             return DONT_CACHE(self._biome._base_radius[0])
-        print("n")
         return max([self.getRadius(x) for x in self._edges])
         
     @cacher()
@@ -359,7 +357,6 @@ class Duals(Polytope):
             amount = self._biome.getConfig()[self._state[0]][self._state[1]]
             
     def missingEdges(self):
-        print len(self._edges) , self._goal_friends, self._edges
         return len(self._edges) < self._goal_friends
     
 class Vertex(Duals):

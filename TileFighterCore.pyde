@@ -58,7 +58,7 @@ def draw():
     background(150)
     partialGens = set({})
     for tile in Polytope.all_polytopes[TILE_POLYTOPE, TileFace]:
-        if posOnScreen(tile.getPosition(), tile.getMaxRadius()):
+        if posOnScreen(tile.getPosition(), 300):
             tile.drawTile(depth=1)
             if tile.notCompletelyGenerated() or tile.missingEdges():
                 partialGens.add(tile)
@@ -69,8 +69,8 @@ def draw():
         
     # Update the biome generation
     partialBiomes = set({})
-    for biome in Polytope.all_polytopes[BIOME_POLYTOPE, BiomeVertex]:
-        if posOnScreen(biome.getPosition(), biome.getMaxRadius()):
+    for biome in Polytope.all_polytopes[BIOME_POLYTOPE, BiomeFace]:
+        if posOnScreen(biome.getPosition(), 300):
             if biome.notCompletelyGenerated() or biome.missingEdges():
                 partialBiomes.add(biome)
     for biome in partialBiomes:
