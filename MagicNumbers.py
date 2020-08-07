@@ -12,4 +12,5 @@ BIOME_SIZE = 1000 # Radius of Biome Tilings
 # ^^^ (note that since biome tilings use the dual, this does not directly correspond to actual radii,
 # but it is linearly related)
 TILE_SIZE = 100 # Radius of Tile Tilings
-VERSION = "0.3a [Alpha]"
+DESIRED_FRAME_RATE = 60
+VERSION = "0.3b[Alpha]"

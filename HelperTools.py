@@ -18,6 +18,10 @@ class cacher:
     
     Python 3.8 has similar function in standard library...
     but this is 2.7 :/
+    ^^^ Actually I believe I've now developed this to be
+    more powerful than the one in the standard library,
+    so yay for that
+    Probably doesn't handle edge cases as well though
     """
     def __init__(self, ignore_kwargs = False):
         self._dict = dict({})

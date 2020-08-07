@@ -23,7 +23,7 @@ player = None
 def setup():
     global current_tile, player
     fullScreen()
-    frameRate(60)
+    frameRate(DESIRED_FRAME_RATE)
     first_biome_v = BiomeVertex(MetaBiome(VertexConfiguration([[3] * 6, [3, 4, 3, 4, 3]]), first_biome=TEST_4_6_12), [0, 0], 0, (0, 0), 1)
     first_biome_v.generate(depth=1)
     first_biome = first_biome_v.getFriends()[0]
@@ -48,7 +48,16 @@ def posOnScreen(pos, leniency):
     ]
     return distance[0] < width / 2 and distance[1] < height / 2
 
+ticks = 0
 def draw():
+    global ticks
+    ticks += 1
+    if ticks % DESIRED_FRAME_RATE == DESIRED_FRAME_RATE - 1:
+        # Print the frame rate - docs say its only accurate
+        # after a few milliseconds, so we make it wait till
+        # the end of the first second to report it
+        print "Frame Rate: ", frameRate
+    
     # First, we do a continuous update on all things:
     for obj in TileBound.all_objects:
         obj.continuousUpdate()

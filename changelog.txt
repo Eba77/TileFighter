@@ -1,3 +1,7 @@
+0.3b Alpha
+- Biome generation infite
+- Sped up a lot using caching; further work still required
+
 0.3a Alpha
 - Biomes generate (but don't do anything)
 - Veeerrry slow now...
