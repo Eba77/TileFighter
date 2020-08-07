@@ -58,7 +58,7 @@ def draw():
     background(150)
     partialGens = set({})
     for tile in Polytope.all_polytopes[TILE_POLYTOPE, TileFace]:
-        if posOnScreen(tile.getPosition(), tile.getAverageRadius()):
+        if posOnScreen(tile.getPosition(), tile.getMaxRadius()):
             tile.drawTile(depth=1)
             if tile.notCompletelyGenerated() or tile.missingEdges():
                 partialGens.add(tile)
@@ -66,6 +66,16 @@ def draw():
         # Any tile that is onscreen needs to be fully generated!
         tile.fullyGenerate()
         tile.drawTile(depth=1)
+        
+    # Update the biome generation
+    partialBiomes = set({})
+    for biome in Polytope.all_polytopes[BIOME_POLYTOPE, BiomeFace]:
+        if posOnScreen(biome.getPosition(), biome.getMaxRadius()):
+            if biome.notCompletelyGenerated() or biome.missingEdges():
+                partialBiomes.add(biome)
+    for biome in partialBiomes:
+        # Any biome that is onscreen needs to be fully generated!
+        biome.fullyGenerate()
         
     # Highlight tile that the cursor is on
     tile_pointing_at = TileFace.getPolytopeOn(TILE_POLYTOPE, getMouse())
@@ -93,7 +103,8 @@ def draw():
     fill(0)
     text("TileFighter Version " + VERSION, 50, 50, 64)
     # Note that biomes exist using dual tilings
-    text("Biome: " + str(BiomeVertex.getPolytopeOn(BIOME_POLYTOPE, getMouse()).getAsBiome()), 50, 70, 64)
+    temp = BiomeVertex.getPolytopeOn(BIOME_POLYTOPE, getMouse())
+    text("Biome: " + str(temp.getAsBiome() if temp is not None else temp), 50, 70, 64)
         
     # Garbage collection; delete finished animations
     TileBound.all_objects = {obj for obj in TileBound.all_objects if not (isinstance(obj, Animation) and not obj._is_moving)}

@@ -330,14 +330,22 @@ class Duals(Polytope):
         d2 = sqrt(square_dist(p2, self.getPosition()))
         return (d1 + d2) / 2
         
-    @cacher()
+    @cacher() # Note that this will probably cache the pre-not-missing-edges value...
     def getAverageRadius(self):
         if self.missingEdges():
             # This is the case when a tile isn't fully generated yet
             # but still needs to give a radius to check if it is on screen
-            return 250
+            return self._biome._base_radius[0]
         avg = lambda x: sum(x, 0) / len(x)
         return avg([self.getRadius(x) for x in self._edges])
+    
+    @cacher() # Note that this will probably cache the pre-not-missing-edges value...
+    def getMaxRadius(self):
+        if self.missingEdges():
+            # This is the case when a tile isn't fully generated yet
+            # but still needs to give a radius to check if it is on screen
+            return self._biome._base_radius[0]
+        return max([self.getRadius(x) for x in self._edges])
         
     @cacher()
     def getSides(self):
