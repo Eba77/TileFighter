@@ -85,7 +85,14 @@ class Polytope:
         For vast majority of cases, this should just be what the
         biome tiling says.
         """
-        return self._biome #BiomeVertex.getPolytopeOn(BIOME_POLYTOPE, position)
+        to_return = BiomeVertex.getPolytopeOn(BIOME_POLYTOPE, position)
+        # Note on double parenthesis of to_return.getAsBiome()();
+        # in theory, biomes can have extra data passed to them, to create 'variants'
+        # I don't take advantage of this yet, but if I did then I'd prolly want
+        # the tiles to be the same variant, so I'd prolly have to introduce
+        # a ._variant_info attribute to Biome or something, and have following line be:
+        # return self._biome if to_return is None else to_return.getAsBiome()(self._biome._variant_info)
+        return self._biome if to_return is None or True else to_return.getAsBiome()() # 'or True' to temporarily disable this
         
     def getPosition(self):
         return self._position

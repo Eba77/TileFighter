@@ -16,3 +16,4 @@ TILE_SIZE = 100 # Radius of Tile Tilings
 DESIRED_FRAME_RATE = 60
 DEBUG_VERTICES = False # Whether or not to show debug info on vertices
 VERSION = "0.3b [Alpha]"
+DEBUG_RENDERER = False

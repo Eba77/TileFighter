@@ -22,7 +22,7 @@ player = None
 
 def setup():
     global current_tile, player
-    fullScreen(FX2D)
+    fullScreen(JAVA2D if DEBUG_RENDERER else FX2D)
     frameRate(DESIRED_FRAME_RATE)
     first_biome_v = BiomeVertex(MetaBiome(VertexConfiguration([[3] * 6, [3, 4, 3, 4, 3]]), first_biome=TEST_4_6_12), [0, 0], 0, (0, 0), 1)
     first_biome_v.generate(depth=1)
