@@ -78,6 +78,15 @@ class Polytope:
         self._position = position
         self._attributes = None # Override in subclasses
         
+    def getNewBiomeFromParent(self, position):
+        """
+        Get's the biome that `self` thinks should be present for
+        tile at `position`
+        For vast majority of cases, this should just be what the
+        biome tiling says.
+        """
+        return self._biome #BiomeVertex.getPolytopeOn(BIOME_POLYTOPE, position)
+        
     def getPosition(self):
         return self._position
     
@@ -427,7 +436,7 @@ class Vertex(Duals):
                 tile = self.getDual().getNearestPolytopeWithin(self.getStyle()[0], new_pos, CLOSENESS_CONSTANT)
                 if tile is None:
                     tile = self.getDual()(
-                        self._biome,
+                        self.getNewBiomeFromParent(new_pos),
                         new_pos,
                         angle,
                         (self._state[0], idx),
@@ -454,7 +463,7 @@ class Vertex(Duals):
                     but it's hard to explain englishically)
                     """
                     new_heading = PI + prev_angle
-                    vert = self.getSual()(self._biome, new_pos, new_heading, self._biome.swap(self._state[0], idx), -self._spin)
+                    vert = self.getSual()(self.getNewBiomeFromParent(new_pos), new_pos, new_heading, self._biome.swap(self._state[0], idx), -self._spin)
                 self.addAdjacent(raw_idx, vert)
                 self._friends[raw_idx].addFriend(vert)
             # Second (technically 'first') part of turning angle increment
@@ -470,7 +479,7 @@ class Vertex(Duals):
         vert = self.getSual().getNearestPolytopeWithin(self.getStyle()[0], new_pos, CLOSENESS_CONSTANT)
         if vert is None:
             new_heading = PI + angle
-            vert = self.getSual()(self._biome, new_pos, new_heading, self._biome.swap(*self._state), -self._spin)
+            vert = self.getSual()(self.getNewBiomeFromParent(new_pos), new_pos, new_heading, self._biome.swap(*self._state), -self._spin)
         self.addAdjacent(0, vert)
         self._friends[0].addFriend(vert)
         # Recursive generation!

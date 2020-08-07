@@ -90,12 +90,11 @@ class Biome:
         side_length = 2 * self._base_radius[v] * sin(self.getTurningAngle(v, 0) / 2)
         radius = side_length / (2 * sin(turn_ang / 2))
         # For testing purposes
-        assert vert_ang == self.getVertexAngle(v, e), "Vertex Angle Fail"
-        assert radius == self.getRadius(v, e), "Radius Fail"
-        assert side_length == self.getSideLength(v, e), "Side Length Fail"
+        #assert vert_ang == self.getVertexAngle(v, e), "Vertex Angle Fail"
+        #assert radius == self.getRadius(v, e), "Radius Fail"
+        #assert side_length == self.getSideLength(v, e), "Side Length Fail"
         return (vert_ang, radius, side_length)
     
-    @cacher()
     def swap(self, v, e):
         return self._vertex_configuration.swap(v, e)
     

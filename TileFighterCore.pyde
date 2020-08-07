@@ -22,7 +22,7 @@ player = None
 
 def setup():
     global current_tile, player
-    fullScreen(P2D)
+    fullScreen(FX2D)
     frameRate(DESIRED_FRAME_RATE)
     first_biome_v = BiomeVertex(MetaBiome(VertexConfiguration([[3] * 6, [3, 4, 3, 4, 3]]), first_biome=TEST_4_6_12), [0, 0], 0, (0, 0), 1)
     first_biome_v.generate(depth=1)
@@ -52,11 +52,6 @@ ticks = 0
 def draw():
     global ticks
     ticks += 1
-    if ticks % DESIRED_FRAME_RATE == DESIRED_FRAME_RATE - 1:
-        # Print the frame rate - docs say its only accurate
-        # after a few milliseconds, so we make it wait till
-        # the end of the first second to report it
-        print "Frame Rate: ", frameRate
     
     # First, we do a continuous update on all things:
     for obj in TileBound.all_objects:
@@ -68,19 +63,20 @@ def draw():
     partialGens = set({})
     for tile in Polytope.all_polytopes[TILE_POLYTOPE, TileFace]:
         if posOnScreen(tile.getPosition(), 300):
-            if DRAW_FACES:
-                tile.drawTile()
             if tile.notCompletelyGenerated() or tile.missingEdges():
                 partialGens.add(tile)
+            elif DRAW_FACES:
+                tile.drawTile()
     for tile in partialGens:
         # Any tile that is onscreen needs to be fully generated!
         tile.fullyGenerate()
-        tile.drawTile()
+        if DRAW_FACES:
+            tile.drawTile()
         
     # Update the biome generation
     partialBiomes = set({})
     for biome in Polytope.all_polytopes[BIOME_POLYTOPE, BiomeFace]:
-        if posOnScreen(biome.getPosition(), 300):
+        if posOnScreen(biome.getPosition(), 1000):
             if biome.notCompletelyGenerated() or biome.missingEdges():
                 partialBiomes.add(biome)
     for biome in partialBiomes:
@@ -116,6 +112,7 @@ def draw():
     # Note that biomes exist using dual tilings
     temp = BiomeVertex.getPolytopeOn(BIOME_POLYTOPE, getMouse())
     text("Biome: " + str(temp.getAsBiome() if temp is not None else temp), 50, 70, 64)
+    text("Frame Rate: " + str(frameRate), 50, 90, 64)
         
     # Garbage collection; delete finished animations
     TileBound.all_objects = {obj for obj in TileBound.all_objects if not (isinstance(obj, Animation) and not obj._is_moving)}
